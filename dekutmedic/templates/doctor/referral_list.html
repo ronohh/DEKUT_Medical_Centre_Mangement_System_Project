@@ -15,14 +15,14 @@
     </div>
     <div class="row">
         <div class="c0l-sm-12">
-            <div class="card card-table">
+            <div class="card">
                 <div class="card-body">
                     {% if messages %}
                     {% for message in messages %}
                     {% if message.tags == 'error' %}
                     <div class="alert alert-warning alert-dismissible fade show" role="alert">
                         {{message}}
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
@@ -35,7 +35,7 @@
                     {% if message.tags == 'success' %}
                     <div class="alert alert-warning alert-dismissible fade show" role="alert">
                         {{message}}
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <button type="button" class="btn-close" data-bsdismiss="alert" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
@@ -43,7 +43,7 @@
                     {% endfor %}
                     {% endif %}
                     <div class="table-responsive">
-                        <table class="table table-hover table-center mb-0 datatable">
+                        <table class="table table-hover mb-0">
                             <thead>
                                 {% if referrals %}
                             <tr>

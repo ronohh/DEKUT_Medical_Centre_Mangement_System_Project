@@ -22,7 +22,7 @@
                     </div>
                     <div class="login-right">
                         <div class="login-right-wrap">
-                            <h1> LOGIN </h1>
+                            <h1 class="mt-5 mb-5"> LOGIN </h1>
                             {% if messages %}
                                 {% for message in messages %}
                                     {% if message.tags == 'error' %}
@@ -41,7 +41,7 @@
                                 {% if message.tags == 'success' %}
                             <div class="alert alert-warning alert-dismissible fade show" role="alert">
                                 {{ message }}
-                                <button type="button" class="close" data-dismiss="alert" aria-label="close">
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close">
                                     <span aria-hidden="true"> </span>
                                 </button>
                             </div>

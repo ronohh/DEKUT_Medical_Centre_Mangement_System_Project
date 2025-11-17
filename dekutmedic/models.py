@@ -54,7 +54,7 @@ class Appointment(models.Model):
     prescription = models.CharField(max_length=250, default="")
     status = models.CharField(default=0, max_length=200)
     pharmacy_status = models.CharField(max_length= 200, null=True, blank=True,)
-    consultancy_fee = models.DecimalField(max_digits=5, decimal_places=2,default=0.00)
+    consultancy_fee = models.DecimalField(max_digits=5, decimal_places=2,default=100)
     paid_by_insurance = models.BooleanField(default=False)
 
     def save(self,*args, **kwargs):
@@ -71,6 +71,10 @@ class Appointment(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def staff_profile(self):
+        return StaffRegistration.objects.get(admin=self.pat_id.admin)
 
 class Hospital(models.Model):
     hname = models.CharField(max_length=255)

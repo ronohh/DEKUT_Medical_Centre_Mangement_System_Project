@@ -24,6 +24,7 @@ urlpatterns = [
     path('Admin/insurance/add', views.InsuranceAdd, name="insuranceadd"),
     path('Admin/insurance/Edit/<str:id>', views.InsuranceEdit, name='editinsurance'),
     path('Admin/insurance/delete/<str:id>', views.InsuranceDelete, name='insurancedelete'),
+    path('Admin/dependants/<int:id>/', views.dependants, name='dependants'),
     
 
 
@@ -82,9 +83,9 @@ urlpatterns = [
     path('PatientAppointmentPrescription/', views.Patient_Appointment_Prescription,name='PatientAppointmentPrescription'),
     path('PatientAppointmentCompleted/', views.Patient_Appointment_Completed, name='PatientAppointmentCompleted'),
     path('doctor/referralList/', views.doctor_referral_list, name='doctor_referrals'),
-    path('BetweenDatePatientReport', views.Between_Date_Report, name='betweendatepatientreport'),
     path('Admin/Allappointment/', views.All_appointment, name="allappointment"),
     path('claim_insurance/<str:id>/', views.claim_insurance, name='claim_insurance'),
+    path('dependants/<str:id>/', views.Dependants, name='dependants'),
     
     # daraja
     path("mpesa/stkpush/", views.stk_push, name="stk_push"),

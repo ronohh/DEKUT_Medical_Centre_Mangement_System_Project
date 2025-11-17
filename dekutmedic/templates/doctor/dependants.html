@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="content container-fluid">
+    <div class="row align-items-center">
+        <div class="col">
+            <h3 class="page-title">Dependants</h3>
+            <ul class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'doctordashboard' %}">Dashboard</a>
+                </li>
+                <li class="breadcrumb-item active">Dependants list</li>
+            </ul>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-xl-7">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover ">
+                            <thead>
+                                {% if dependants %}
+                                <tr>
+                                    <th>#</th>
+                                    <th>Name</th>
+                                    <th>Gender</th>
+                                    <th>Year of birth</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    {% for i in dependants %}
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ i.first_name }} {{ i.last_name }}</td>
+                                    <td>{{ i.gender }}</td>
+                                    <td>{{ i.date_of_birth }}</td>
+                                   {% endfor %}
+                                   {% else %}
+                                    <p>No dependants</p>
+                                    {% endif %}
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

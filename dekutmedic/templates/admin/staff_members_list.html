@@ -52,7 +52,11 @@
                                             {% else %}
                                             <a href="{% url 'insuranceadd' %}" class="btn btn-sm bg-primary" >ADD</a>
                                             {% endif %}
-                                            <a href=""  onclick="return confirm('proceed to this delete staff')" class="btn btn-sm bg-danger">Delete</a>
+
+                                            
+                                        <a href="{% url 'dependants' i.id %}" class=" btn btn-sm btn-info "> Dependants </a>
+                                            
+                                        <a href=""  onclick="return confirm('proceed to this delete staff')" class="btn btn-sm bg-danger">Delete</a>
                                         </div>
                                     </td>
                                 </tr>

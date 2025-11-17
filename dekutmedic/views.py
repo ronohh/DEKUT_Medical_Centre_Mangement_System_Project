@@ -70,10 +70,10 @@ def dologin(request):
             
 
         else:
-            messages.error(request, 'Email or Password is not valid')
+            messages.error(request, 'username or Password is not valid')
             return redirect('login')
     else:
-        messages.error(request, 'Email or Password is not valid')
+        messages.error(request, 'username or Password is not valid')
         return redirect('login')
 
 # admin panel
@@ -262,6 +262,7 @@ def InsuranceDelete(request, id):
     insurance.delete()
     messages.success(request, "Insurance deleted sucessfully")
     redirect("insurancelist")
+
 def claim_insurance(request, id):
     appointment = get_object_or_404(Appointment, id=id)
     try:
@@ -276,6 +277,15 @@ def claim_insurance(request, id):
         messages.error(request, "No insurance found for this patient")
 
     return redirect('approvedappointments')
+
+def dependants(request, id):
+    staff = get_object_or_404(StaffRegistration, id=id)
+    dependants = Dependant.objects.filter(staff=staff)
+    context ={
+        "staff" : staff,
+        "dependants" : dependants
+    }
+    return render(request,'admin/dependants.html', context)
 
 
 # staff
@@ -311,9 +321,13 @@ def staffregistration(request):
             user.set_password(password)
             user.save()
 
-            staff = PatientReg(
+            patient = PatientReg(
+                admin=user,
+                gender=gender
+            )
+            patient.save()
+            staff = StaffRegistration(
                 admin = user,
-                gender = gender
             )
             staff.save()
             messages.success(request, 'Signup successfully')
@@ -324,17 +338,14 @@ def staffregistration(request):
     return render(request, 'staff/staff-register.html')
 
 def staffhome(request):
-
-    return render(request, 'staff/staffhome.html')
-
-def dependantslist(request):
-    staff_user = request.user
-    staff = StaffRegistration.objects.get(admin= staff_user)
-    dependants = Dependant.objects.filter(staff = staff)
+    admin = request.user
+    staff = PatientReg.objects.get(admin= admin)
+    userdetails = Appointment.objects.filter(pat_id=staff)
     context = {
-        'dependants': dependants
+        'insurance': userdetails
     }
-    return render(request, 'staff/dependants_list.html', context )
+
+    return render(request, 'staff/staffhome.html',context)
 
 def AddDependants(request):
     if request.method == "POST":
@@ -359,6 +370,15 @@ def AddDependants(request):
         return redirect('dependantslist')
 
     return render(request, 'staff/add_dependants.html')
+
+def dependantslist(request):
+    staff_user = request.user
+    staff = StaffRegistration.objects.get(admin= staff_user)
+    dependants = Dependant.objects.filter(staff = staff)
+    context = {
+        'dependants': dependants
+    }
+    return render(request, 'staff/dependants_list.html', context )
 
 def Requestreferral(request):
     try:
@@ -436,20 +456,12 @@ def patientregistration(request):
     return render(request, 'patient/register.html')
 
 def patienthome(request):
-    doctor_count = DoctorRegistration.objects.all().count
-    context= {
-        'doctor_count': doctor_count,
-    }
-
-    return render(request, 'patient/patienthome.html',context)
+    return render(request, 'patient/patienthome.html',)
 
 def Index(request):
     doctorview =DoctorRegistration.objects.all()
-    first_page = Page.objects.first()
-
     context = {
-        'doctorview':doctorview,
-        'page': first_page
+        'doctorview':doctorview
     }
 
     return render(request, 'index.html', context)
@@ -458,7 +470,7 @@ def get_doctor(request):
     if request.method == 'GET':
         doctors = DoctorRegistration.objects.all()
         data = [
-            {"id": doc.id, "name":f"{doc.admin.first_name}"}
+            {"id": doc.id, "name":f"{doc.admin.first_name} {doc.admin.last_name}"}
             for doc in doctors if doc.admin
         ]
         
@@ -511,7 +523,7 @@ def create_appointment(request):
 def view_appointment_history(request):
     pat_reg = request.user
     pat_admin = PatientReg.objects.get(admin= pat_reg)
-    userapptdetails = Appointment.objects.filter(pat_id=pat_admin)
+    userapptdetails = Appointment.objects.filter(pat_id=pat_admin).order_by('-created_at','-date_of_appointment')
     context = {
         'vah': userapptdetails
     }
@@ -593,7 +605,7 @@ def pharmacistdashboard(request):
 
 def newappointments(request):
     pharmacist_admin = request.user
-    Approved_Appointments = Appointment.objects.filter(status='Approved')
+    Approved_Appointments = Appointment.objects.filter(status='Approved').order_by('-updated_at')
     context = {'Approved_Appointments': Approved_Appointments}
     return render(request, 'pharmacist/new_appointments.html', context)
 
@@ -690,12 +702,7 @@ def Add_Patient(request):
         medhistory = request.POST.get('medhistory')
 
         doctor_admin = request.user
-        try:
-            doct_id = DoctorRegistration.objects.get(admin=doctor_admin)
-        except DoctorRegistration.DoesNotExist:
-            messages.error(request, "Doctor not found")
-            return redirect('addpatient')
-        
+        doct_id = DoctorRegistration.objects.get(admin=doctor_admin)
         if AddPatient.objects.filter(email=email).exists():
             messages.warning(request, 'Email already exists')
             return redirect('addpatient')
@@ -712,7 +719,7 @@ def Add_Patient(request):
             doctor_id=doct_id,
         )
         addpatient.save()
-        messages.success(request, 'Data added successfully')
+        messages.success(request, 'patient added successfully')
         return redirect('addpatient')
     
     return render(request, 'doctor/add_patient.html')
@@ -803,7 +810,7 @@ def edit_patient(request):
     return render(request, 'edit_patient.html')
 
 def All_appointment(request):
-    patientdetails = Appointment.objects.all()
+    patientdetails = Appointment.objects.all().order_by('-created_at','-date_of_appointment')
 
     context = {
         'patientdetails': patientdetails
@@ -815,21 +822,14 @@ def View_Appointment(request):
     try:
         doctor_admin = request.user
         doctor_reg = DoctorRegistration.objects.get(admin= doctor_admin)
-        View_Appointment = Appointment.objects.filter(doctor_id=doctor_reg)
+        view_appointment = Appointment.objects.filter(doctor_id=doctor_reg)
 
-        #pagination
-        paginator = Paginator(View_Appointment, 10 )
-        page = request.GET.get('page')
-        try:
-            view_appointment = paginator.page(page)
-        except EmptyPage:
-            view_appointment = Paginator.page(paginator.num_pages)
-
-        context = {'view_appointment': view_appointment}
+        context = {
+            'view_appointment': view_appointment
+            }
     except Exception as e:
         context = {'error_message': str(e)}
     
-
     return render(request, 'doctor/view_appointment.html', context)
 
 def View_Appointment_Details(request, id):
@@ -862,7 +862,7 @@ def Patient_Appointment_Details_Remark(request):
 def New_Appointments(request):
     doctor_admin = request.user
     doctor_reg = DoctorRegistration.objects.get(admin=doctor_admin)
-    patientdetails1 = Appointment.objects.filter(status="0", doctor_id= doctor_reg)
+    patientdetails1 = Appointment.objects.filter(status="0", doctor_id= doctor_reg).order_by('date_of_appointment', 'time_of_appointment')
 
     context = { 
         'patientdetails1' : patientdetails1,
@@ -896,7 +896,9 @@ def Patient_List_Approved_Appointment(request):
     doctor_admin =request.user
     doctor_reg = DoctorRegistration.objects.get(admin=doctor_admin)
     patientdetails1 = Appointment.objects.filter(status='Approved',doctor_id=doctor_reg)
-    context = {'patientdetails1': patientdetails1 }
+    context = {
+        'patientdetails1': patientdetails1
+          }
     return render(request, 'doctor/patient_list_approved_appointment.html', context)
 
 def DoctorAppointmentList(request,id):
@@ -955,22 +957,13 @@ def doctor_referral_list(request):
     }
     return render(request, "doctor/referral_list.html", context)
 
-def Between_Date_Report(request):
-    start_date = request.GET.get('start_date')
-    end_date = request.GET.get('end_date')
-
-    patient = []
-    doctor_admin = request.user
-    doctor_reg = DoctorRegistration.objects.get(admin=doctor_admin)
-
-    if start_date and end_date:
-        try:
-            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
-            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
-        except ValueError:
-            return render(request, 'doctor/between_dates_report.html', {'patient':patient, 'error_message':'Invalid date format'})
-        patient = Appointment.objects.filter(created_at__range=(start_date, end_date) & Appointment.objects.filter(doctor_id=doctor_reg))
-    return render(request, 'doctor/between_dates_report.html',{'patient':patient, 'start_date':start_date, 'end_date': end_date})
+def Dependants(request, id):
+    staff =get_object_or_404(StaffRegistration, id=id)
+    dependants = Dependant.objects.filter(staff=staff)
+    context = {
+        'dependants': dependants
+    }
+    return render(request, 'doctor/dependants.html', context)
 
 
 # DARAJA

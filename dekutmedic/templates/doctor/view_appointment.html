@@ -6,6 +6,7 @@
         <div class="row align-items-center">
             <div class="col">
                 <div class="page-title">
+                    
                     <ul class="breadcrumb">
                         <li class="breadcrumb-item"><a href="{% url 'doctordashboard' %}">Dashboard</a></li>
                         <li class="breadcrumb-item">View Appointment</li>
@@ -76,7 +77,7 @@
 
                                 <td class="text-right">
                                     <div class="actions">
-                                        <a href="{% url 'patientappointmentdetails' i.id %}"><i class="btn btn-primary btn-block">View</i></a>
+                                        <a href="{% url 'viewappointmentdetails' i.id %}"><i class="btn btn-primary btn-block">View</i></a>
                                     </div>
                                 </td>
                             </tr>
@@ -88,13 +89,6 @@
                         </table>
 
 
-                        <!-- pagination controls -->
-                        <div class="pagination" style="">
-                            <span class="step-links">
-                                <!-- if view_appointment.has_previous 
-                                <a href=""> First</a> -->
-                            </span>
-                        </div>
                     </div>
                 </div>
             </div>

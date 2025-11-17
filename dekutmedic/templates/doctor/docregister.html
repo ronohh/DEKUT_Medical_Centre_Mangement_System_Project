@@ -18,19 +18,19 @@
             <div class="container">
                 <div class="loginbox">
                     <div class="login-left">
-                        <p style=""> DEKUT MEDICAL CENTRE</p>
+                        <p> DEKUT MEDICAL CENTRE</p>
                     </div>
                     <div class="login-right">
-                        <div class="login-right-wrap">
-                            <h1>SIGN UP </h1>
+                        <div class="login-right-wrap ">
+                            <h1 class="mb-4 mt-1">SIGN UP </h1>
                             <form action="" method="POST" enctype="multipart/form-data">
                                 {% if messages %}
                                 {% for message in messages %}
                                    {% if message.tags == 'error' %}
                                 <div class="alert alert-warning alert-dismissible fade show" role="alert">
                                     {{ message}}
-                                <button type="button" class="close" data-dismiss="alert" aria-label="close">
-                                    <span aria-hidden="true"></span>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close">
+                                    <span aria-hidden="true">&times;</span>
                                 </button>
                                 </div>   
                                 {% endif %}
@@ -41,8 +41,8 @@
                                     {% if message.tags == 'success' %}
                                 <div class="alert alert-warning alert-dismissible fade show" role="alert">
                                     {{ message}}
-                                <button type="button" class="close" data-dismiss="alert" aria-label="close">
-                                    <span aria-hidden="true"></span>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close">
+                                    <span aria-hidden="true">&times;</span>
                                 </button>
                                 </div>
                                 {% endif %}
@@ -50,12 +50,12 @@
                                 {% endif %}
                                 {% csrf_token %}
                                 <div class="form-group">
-                                    <label> Profile Pic</label>
+                                    <label> Profile Picture</label>
                                     <input id="picture" type="file" class="form-control" name="pic" required="true">
                                 </div>
                                 <div class="form-group">
                                     <label>First Name</label>
-                                    <input id="first_name" type="text" class="form-control" placeholder="First Name" name="first_name" required="true">
+                                    <input id="first_name" type="text" class="form-control" placeholder=" enter First Name" name="first_name" required="true">
                                 </div>
                                 <div class="form-group">
                                     <label> Last Name</label>
@@ -66,8 +66,8 @@
                                     <input id="email" type="text" class="form-control" placeholder="Email" name="email" required="true">
                                 </div>
                                 <div class="form-group">
-                                    <label> username</label>
-                                    <input id="username" type="text" class="form-control" placeholder="Username" name="username" required="true">
+                                    <label> Username</label>
+                                    <input id="username" type="text" class="form-control" placeholder="username" name="username" required="true">
                                 </div>
                                 <div class="form-group">
                                     <label>Mobile Number</label>
@@ -78,7 +78,7 @@
                                     <input id="password" type="password" class="form-control" placeholder="Password" name="password" required="true">
                                 </div>
                                 <div class="form-group">
-                                    <button class="btn btn-primary btn-block" type="submit">Register</button>
+                                    <button class="btn btn-primary btn-block mt-4" type="submit">Register</button>
                                 </div>
                             </form>
                             <div class="text-center already-have"><a href="{% url 'login' %}">Already have an account? click me</a></div>

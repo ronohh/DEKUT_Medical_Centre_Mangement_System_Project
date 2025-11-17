@@ -70,18 +70,13 @@
                                         <span class="badge bg-danger">Rejected</span>
                                         {% endif %}
                                     </td>
-                                    <td class="text-right">
-                                        <div class="actions">
-                                            <td>
-                                                {% if appointment.status != "Accepted" and appointment.status != "Rejected" %}
-                                                <form action="">
-                                                    <button type="submit"> cancel</button>
-                                                </form>
-                                                {% else %}
-                                                <span class="text-muted"> cannot cancel</span>
-                                                {% endif %}
-                                            </td>
-                                        </div>
+                                    
+                                    <td>
+                                        {% if i.status == "pending" %}
+                                        <span class="badge bg-danger"></span>
+                                        {% else %}
+                                        <span class="text-muted"> cannot cancel</span>
+                                        {% endif %}
                                     </td>
                                 </tr>
                                 {% empty %}

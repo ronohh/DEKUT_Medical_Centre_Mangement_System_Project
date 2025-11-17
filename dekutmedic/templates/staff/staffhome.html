@@ -16,5 +16,56 @@
             </div>
         </div>
     </div>
+
+    <div class="row mt-5">
+        <div class="col-lg-10">
+            <div>
+                <i class="fa-solid fa-user"></i><span>Basic information</span>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <table class="table table-hover mb-0">
+                        <tr>
+                            <th>First name</th>
+                            <td>{{ user.first_name }}</td>
+                            <th>Email</th>
+                            <td>{{ user.email }}</td>
+                        </tr>  
+                        <tr>
+                            <th>Last name</th>
+                            <td>{{ user.last_name }}</td>
+                            <th>Mobile Number</th>
+                            <td>{{ user.mobilenumber }}</td>
+                        </tr> 
+                        <tr>
+                            <th>profile picture</th>
+                            <td>{{ user.profile_pic.url }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-2">
+        <div class="col-lg-10">
+            {% if user.patientreg.insurance %}
+            <h4>Insurance Information</h4>
+            <div class="card">
+                <div class="card-body">
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Total cover</th>
+                            <td>{{ user.patientreg.insurance.total_cover }}</td>
+                        </tr>
+                        <tr>
+                            <th>Remaining Balance</th>
+                            <td>{{ user.patientreg.insurance.balance }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
 {% endblock %}

@@ -8,7 +8,7 @@
                 <h3 class="page-title">Appointments</h3>
                 <ul class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{% url 'doctordashboard' %}">Dashboard</a></li>
-                    <li class="breadcrumb-item active">View Appointments</li>
+                    <li class="breadcrumb-item active">Patients Appointments Details</li>
                 </ul>
             </div>
         </div>
@@ -49,7 +49,7 @@
                         <table class="table table-hover table-center mb-0 datatable ">
                             
                             {% for i in patientdetails %}
-                            <tr><label style="font-size: medium;text-align: center; padding-right: 50px;"> Appointment Number: {{i.appointmentnumber}}</label>  <span>creation date: {{i.created_at}} </span></tr>
+                            <tr><label style="font-size: medium;text-align: center; padding-right: 50px; margin-bottom: 20px;"> Appointment Number: {{i.appointmentnumber}}</label>  <span>creation date: {{i.created_at}} </span></tr>
                             <tr>
                                 <th>Patient Name</th>
                                 <td>{{i.pat_id.admin.first_name}} {{i.pat_id.admin.last_name}}</td>

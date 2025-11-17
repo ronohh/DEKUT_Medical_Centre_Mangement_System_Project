@@ -127,8 +127,39 @@
         </div>
     </div>
 </div>
-<div>
-    <p>doctor availability</p>
+<div class="row mt-5">
+    <div class="col-lg-10">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Doctor</th>
+                                <th>Day</th>
+                                <th>Availability</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{ forloop.Counter }}</td>
+                                <td>Doctor two</td>
+                                <td>Monday,Tuesday,Wednesday</td>
+                                <td>7 AM - 4 PM</td>
+                            </tr>
+                            <tr>
+                                <td>{{ forloop.Counter }}</td>
+                                <td>doctor four</td>
+                                <td>Thursday, Friday,Saturday</td>
+                                <td>7 AM - 4 PM</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <script>
     document.addEventListener("DOMContentLoaded", function (){
