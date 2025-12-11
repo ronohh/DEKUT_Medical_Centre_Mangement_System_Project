@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="content container-fluid">
+    <div class="page-header">
+    <div class="row align-items-center">
+            <div class="col">
+                <h3>Patient details</h3>
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="">Dashboard</a></li>
+                    <li class="breadcrumb-item active">referral details</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="card">
+                <div class="card-body">
+                    {% if messages %}
+                    {% for message in messages %}
+                    {% if message.tags == 'error' %}
+
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    {{message}}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                     <span aria-hidden="true">&times;</span>
+                    </button>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+
+                    {% if messages %}
+                    {% for message in messages %}
+                    {% if message.tags == 'success' %}
+
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-labe="Close" >
+                            <span></span>
+                        </button>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            {% for i in vrd %}
+                            <tr>
+                                <th>First Name</th>
+                                <td>{{ i.pat_id.admin.first_name }}</td>
+                                <th>Last Name</th>
+                                <td>{{ i.pat_id.admin.last_name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Date</th>
+                                <td>{{ i.date_of_referral }}</td>
+                                <th>Time</th>
+                                <td>{{ i.time_of_referral }}</td>
+                            </tr>
+                            <tr>
+                                <th>Reason</th>
+                                <td >{{ i.additional_msg }}</td>
+                            </tr>
+                            {% if i.referral_status == "Visited" %}
+                            <tr>
+                                <th>Diagnosis</th>
+                                <td>{{ i.diagnosis }}</td>
+                                <th>Prescription</th>
+                                <td>{{ i.prescription }}</td>
+                            </tr>
+                            <tr>
+                                <th>Fee charged</th>
+                                <td>{{ i.referral_fee }}</td>
+                            </tr>
+                            {% endif %}
+                            
+                        </table>
+                        {% if i.referral_status == "Not Visited" %}
+                            <p style="padding-top: 20px;">
+                                <button class="btn btn-primary " data-bs-toggle="modal" data-bs-target="#myModal{{i.id}}">Take Action</button>
+                            </p>
+                        {% endif %}
+
+                        <div class="modal fade" id="myModal{{ i.id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Take Action</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <table class="table table-bordered table-hover data-tables">
+                                            <form method="POST" action="{% url 'referralappointmentremarks' %}">
+                                                {% csrf_token %}
+                                                <tr>
+                                                    <th>Diagnosis</th>
+                                                    <td>
+                                                        <textarea name="diagnosis" placeholder="diagnosis" class="form-control wd-450" rows="12" cols="14" ></textarea>
+                                                    </td>
+                                                    <input type="hidden" value="{{ i.id }}" name="pat_id" id="pat_id" class="form-control" required="true">
+                                                </tr>
+                                                <tr>
+                                                    <th>Prescription :</th>
+                                                    <td>
+                                                        <textarea name="prescription" placeholder="prescription" rows="12" col="14" class="form-control w-450" required="true"></textarea>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Cost :</th>
+                                                    <td>
+                                                        <textarea name="referral_fee" placeholder="KSHs" class="form-control wd-450" required></textarea>
+                                                    </td>
+                                                    <input type="hidden" value="i.id" name="" class="form-control" required>
+                                                </tr>
+                                                <tr>
+                                                    <th>Status :</th>
+                                                    <td>
+                                                        <select name="referral_status" class="form-control wd-450" required="true">
+                                                            <option value="Visited" selected="true"> Visited</option>
+                                                            <option value="Not Visited"> Not Visited</option>
+                                                        </select>
+                                                    </td>
+                                        </tr>
+                                        </table>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                <button type="submit" class="btn btn-primary" name="submit">Update</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>    
+                    </div>
+                    {%  endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

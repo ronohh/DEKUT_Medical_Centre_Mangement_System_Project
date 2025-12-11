@@ -152,7 +152,7 @@
         </li>
     </ul>
 </div>
-{% else %}
+{% elif  user.user_type == 5 %}
 <div class="header">
     <div class="header-left">
         <a href="{% url 'staffdashboard' %}">
@@ -180,6 +180,39 @@
                     </div>
                     <a class="dropdown-item" href="{% url 'profile' %}"> My Pofile</a>
                     <a class="dropdown-item" href="">setting</a>
+                    <a class="dropdown-item" href="{% url 'dologout' %}">logout</a>
+                </div>
+            </div>
+        </li>
+    </ul>
+</div>
+{% else %}
+<div class="header">
+    <div class="header-left">
+        <a href="">
+            <img src="{% static 'images/logo.png' %}" alt="DEKUT Medical Centre" width="400" height="">
+        </a>
+    </div>
+    <a class="mobile_btn">
+        <i class="fas fa-bars"></i>
+    </a>
+    <ul class="nav user-menu">
+        <li class="nav-item dropdown ">
+            <a href="#" class="dropdown-toggle nav-link" data-bs-toggle="dropdown">
+                <span class="user-img">
+                    <img class="rounded-circle" src="{{ user.profile_pic.url }}" width="31" alt=" profile pic">
+                </span>
+            </a>
+            <div class="dropdown-menu">
+                <div class="user-header">
+                    <div class="avatar avatar-sm">
+                        <img src="{{ user.profile_pic.url }}" alt="user image" class="avatar-img rounded-circle">
+                    </div>
+                    <div class="user-text">
+                        <h6>{{user.first_name}} {{user.last_name}}</h6>
+                        <p class="text-muted mb-0">Hospital</p>
+                    </div>
+                    <a class="dropdown-item" href="{% url 'profile' %}"> My Pofile</a>
                     <a class="dropdown-item" href="{% url 'dologout' %}">logout</a>
                 </div>
             </div>

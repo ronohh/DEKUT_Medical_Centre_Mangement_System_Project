@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="content container-fluid">
+    <div class="page-header">
+        <div class="row">
+            <div class="col">
+                <h3 class="page-title">Patients</h3>
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'pharmacistdashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Patients Record</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-center table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Patient Name</th>
+                                    <th>Doctor</th>
+                                    <th>contact No:</th>
+                                    <th>Medication</th>
+                                    <th>date Issued</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for i in patient_records %}
+                                <tr>
+                                    <td>{{i.pat_id.name}}</td>
+                                    <td>{{i.pat_id.doctor_id.admin.first_name}}</td>
+                                    <td>{{i.pat_id.mobilenumber}}</td>
+                                    <td>{{i.prescription}}</td>
+                                    <td>{{i.updated_at}}</td>
+                                    <td class="text-right">
+                                        {% if i.pharmacy_status == "prescribed" %}
+                                        <span class="badge bg-success">{{ i.pharmacy_status }}</span>
+                                        {% elif i.pharmacy_status == "not prescribed" %}
+                                            <span class="badge bg-danger">{{ i.pharmacy_status }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

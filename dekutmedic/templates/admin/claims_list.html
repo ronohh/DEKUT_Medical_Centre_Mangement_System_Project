@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="content container-fluid">
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h3>Medical Claims</h3>
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admindashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Claims List</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Hospital</th>
+                                    <th>Claim Amount</th>
+                                    <th>Status</th>
+                                    <th>Submitted At</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for i in claims %}
+                                <tr>
+                                    
+                                    <td>{{ i.pat_id.admin.first_name }} {{ i.pat_id.admin.last_name }}</td>
+                                    <td>{{ i.hospital.admin.first_name }} {{ i.hospital.admin.last_name }}</td>
+                                    <td>{{ i.claim_amount }}</td>
+                                    <td>{{ i.status }}</td>
+                                    <td>{{ i.submitted_at }}</td>
+                                    <td>
+                                        {% if i.status == 'Pending' %}
+                                        <a href="{% url 'update_claim_status' i.id 'approve' %} " class="btn btn-success btn-sm">Approve</a>
+                                        <a href="{% url 'update_claim_status' i.id 'reject' %}" class="btn btn-danger btn-sm">Reject</a>
+                                        {% else %}
+                                        <span class="badge bg-info">Done</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+{% endblock %}

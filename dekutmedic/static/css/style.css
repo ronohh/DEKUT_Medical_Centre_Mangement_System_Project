@@ -223,9 +223,7 @@
 /* dashboard header */
 .header {
     display:flex;
-    /* brings them horizontally but attached */
     align-items: center;
-    /* spaces them  */
     justify-content: space-between;  
     background:#2f7c41;
     padding: 10px 20px;
@@ -486,7 +484,7 @@
     padding: 15x 20px;
 }
 .card-wrapper .card-title {
-    margin: 10px;;
+    margin: 10px;
     font-size: 18px;
     font-weight: 600;
 }

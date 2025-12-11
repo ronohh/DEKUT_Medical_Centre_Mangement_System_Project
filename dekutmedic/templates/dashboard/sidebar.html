@@ -22,6 +22,7 @@
                 <li>
                     <a href="{% url 'insurancelist' %}"><i class="fas fa-clipboard-list"></i><span>Insurance List</span></a>
                 </li>
+                <li><a href="{% url 'review_claims' %}"><i class="fas fa-users"></i><span>claims</span></a></li>
             </ul>
         </div>
     </div>
@@ -61,7 +62,6 @@
                 <li>
                     <a href="{% url 'doctor_referrals' %}"><i class="fas fa-ambulance"></i>Referral</a>
                 </li>
-
             </ul>
         </div>
     </div>
@@ -109,7 +109,7 @@
         </div>
     </div>
 </div>
-{% else %}
+{% elif user.user_type == 5 %}
 <div class="sidebar">
     <div class="sidebar-inner">
         <div class="sidebar-menu">
@@ -119,6 +119,19 @@
                 <li><a href="{% url 'newpharmacistappointments' %}"><i class="fas fa-users"></i><span>New appointment</span></a></li>
                 <li><a href="{% url 'newpharmacistpatients' %}"><i class="fas fa-users"></i><span>New patient</span></a></li>
                 <li><a href="{% url 'pharmacy_records' %}"><i class="fas fa-clipboard-list"></i><span>records</span></a></li>
+                <li><a href="{% url 'patient_records' %}"><i class="fas fa-users"></i> <span>patient record</span></a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="sidebar">
+    <div class="sidebar-inner">
+        <div class="sidebar-menu">
+            <ul>
+                <li class="menu-title"> <span>Main Menu</span> </li>
+                <li><a href="{% url 'hospitalReferral' %}"><i class="fas fa-ambulance"></i><span>referral</span></a></li>
+                <li><a href="{% url 'treatedreferrals' %}"><i class="fas fa-ambulance"></i><span>Treated referrals</span></a></li>
             </ul>
         </div>
     </div>

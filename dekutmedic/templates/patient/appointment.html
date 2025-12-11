@@ -2,31 +2,7 @@
 {% block content %}
 
 <div class="content container-fluid">
-    {% if user.user_type == 1 %}
-    <div class="page-header">
-        <div class="row">
-            <div class="col">
-                <h3 class="page-title">Book Appointment</h3>
-                <ul class="breadcrumb">
-                    <li class="breadcrumb-item"> <a href="{% url 'admindashboard' %}">Dashboard</a></li>
-                    <li class="breadcrumb-item active">Book Appointment</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    {% elif user.user_type == 2 %}
-    <div class="page-header">
-        <div class="row">
-            <div class="col">
-                <h3 class="page-title"> Profile Details</h3>
-                <ul class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{% url 'doctordashboard' %}">Dashboard</a></li>
-                    <li class="breadcrumb-item active"> Book Appointment</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    {% elif user.user_type == 3 %}
+    {% if user.user_type == 3 %}
     <div class="page-header">
         <div class="row">
             <div class="col">
@@ -42,7 +18,7 @@
     <div class="page-header">
         <div class="row">
             <div class="col">
-                <h3 class="page-title"> Profile Details</h3>
+                <h3 class="page-title"> Appointment </h3>
                 <ul class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{% url 'staffdashboard' %}">Dashboard</a></li>
                     <li class="breadcrumb-item hover">Book Appointment</li>

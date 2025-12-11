@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="content container-fluid">
+    <div class="row align-items-center">
+        <div class="col">
+            <h3>Hospital refferals</h3>
+            <ul class="breadcrumb">
+                <li class="breadcrumb-item"> Dashboard</li>
+                <li class="breadcrumb-item active"> refferals</li>
+            </ul>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Reason</th>
+                                    <th>Status</th>
+                                    {% if view_type == 'treated' %}
+                                    <th>Payment</th>
+                                    {% endif %}
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {%  for i in Hreferrals %}
+                                <tr>
+                                <td>{{ i.pat_id.admin.first_name }} {{ i.pat_id.admin.last_name }}</td>
+                                <td>{{ i.date_of_referral }}</td>
+                                <td>{{ i.time_of_referral }}</td>
+                                <td>{{ i.additional_msg }}</td>
+                                <td>{{ i.referral_status }}</td>
+                                {% if view_type == 'treated' %}
+                                <td>
+                                    {% if not i.medicalclaim %}
+                                    <a href="{% url 'fileclaim' i.id %}" class="btn btn-sm btn-warning">File Claim</a>
+                                    {% else %}
+                                    <span class="badge bg-info">{{i.medicalclaim.status}}</span>
+                                    {% endif %}
+                                </td>
+                                {% endif %}
+                                <td>
+                                    <a href="{% url 'referraldetails' i.id %}" class="btn btn-sm btn-primary">View</a>
+                                </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -8,6 +8,7 @@ class CustomUser(AbstractUser):
         (3, 'patient'),
         (4, 'staff' ),
         (5, 'pharmacist'),
+        (6, 'hospital'),
     )
     user_type = models.IntegerField(choices=USER, default=1)
 
@@ -43,6 +44,15 @@ class PatientReg(models.Model):
     regdate_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+class HospitalRegistration(models.Model):
+    admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
+    location = models.CharField(max_length=255 , null=True, blank=True)
+    regdate_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.admin.first_name} {self.admin.last_name} {self.location}"
+
 class Appointment(models.Model):
     appointmentnumber = models.IntegerField(default=0)
     pat_id = models.ForeignKey(PatientReg, on_delete=models.CASCADE)
@@ -76,17 +86,10 @@ class Appointment(models.Model):
     def staff_profile(self):
         return StaffRegistration.objects.get(admin=self.pat_id.admin)
 
-class Hospital(models.Model):
-    hname = models.CharField(max_length=255)
-    contact = models.CharField(max_length=15)
-
-    def __str__(self):
-        return self.hname
-
 class ReferralAppointment(models.Model):
     referralnumber = models.IntegerField(default=0)
     pat_id = models.ForeignKey(PatientReg, on_delete=models.CASCADE)
-    hospital_id = models.ForeignKey(Hospital, on_delete=models.CASCADE)
+    hospital_id = models.ForeignKey(HospitalRegistration, on_delete=models.CASCADE)
     date_of_referral = models.CharField(max_length=250)
     time_of_referral = models.CharField(max_length=250)
     doctor_id = models.ForeignKey(DoctorRegistration, on_delete=models.CASCADE)
@@ -94,9 +97,24 @@ class ReferralAppointment(models.Model):
     remark = models.CharField(max_length=250, blank=True, null=True)
     status = models.CharField(max_length=20,choices=[("Pending","Pending"),("Accepted","Accepted"),("Rejected","Rejected")], default="Pending")
 
+    diagnosis = models.CharField(max_length=250, default="")
+    prescription = models.CharField(max_length=250, default="")
+    referral_fee = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    referral_status = models.CharField(max_length=250, default="Not Visited", choices=[("Not Visited","Not Visited"),("Visited","Visited")])
+    paid_by_insurance = models.BooleanField(default=False)
+
     created_at= models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now= True)
-    
+
+class MedicalClaim(models.Model):
+    referral = models.OneToOneField(ReferralAppointment, on_delete=models.CASCADE)
+    hospital = models.ForeignKey(HospitalRegistration, on_delete=models.CASCADE)
+    pat_id = models.ForeignKey(PatientReg, on_delete=models.CASCADE)
+    claim_amount = models.DecimalField(max_digits=10, decimal_places=2)
+
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=[("Pending","Pending"),("Approved","Approved"),("Rejected","Rejected")], default="Pending")
+    paid = models.BooleanField(default=False)
 
 class AddPatient(models.Model):
     doctor_id = models.ForeignKey(DoctorRegistration, on_delete=models.CASCADE)
@@ -105,6 +123,7 @@ class AddPatient(models.Model):
     email = models.EmailField(max_length=200)
     gender = models.CharField(max_length=100)
     medicalhistory = models.TextField(max_length= 10)
+    pharmacy_status = models.CharField(max_length=100, null=True, blank=True)
     regdate_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add=True)
 
@@ -115,6 +134,7 @@ class MedicalHistory(models.Model):
     bodytemp =models.CharField(max_length=250)
     diagnosis = models.CharField(max_length= 250)
     prescription = models.TextField()
+    pharmacy_status = models.CharField(max_length=100, null=True, blank=True)
     visitingdate_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

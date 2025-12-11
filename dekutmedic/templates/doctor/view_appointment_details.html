@@ -16,7 +16,7 @@
 
     <div class="row">
         <div class="col-sm-12">
-            <div class="card card-table">
+            <div class="card ">
                 <div class="card-body">
                     {% if messages %}
                     {% for message in messages %}
@@ -46,7 +46,7 @@
                     {% endif %}
 
                     <div class="table-responsive">
-                        <table class="table table-hover table-center mb-0 datatable ">
+                        <table class="table table-hover table-center mb-0  ">
                             
                             {% for i in patientdetails %}
                             <tr><label style="font-size: medium;text-align: center; padding-right: 50px; margin-bottom: 20px;"> Appointment Number: {{i.appointmentnumber}}</label>  <span>creation date: {{i.created_at}} </span></tr>
@@ -166,18 +166,18 @@
                                             <td>
                                                 <textarea name="diagnosis" placeholder="Remark" rows="12" cols="14" class="form-control wd-450" required="true"></textarea>
                                             </td>
-                                            <input type="hidden" value="{{ i.id }}" name="pat_id" id="pat_id" class="form-control" required="">
+                                            <input type="hidden" value="{{ i.id }}" name="pat_id" id="pat_id" class="form-control" required="true">
                                         </tr>
                                         <tr>
-                                            <th>Prescription</th>
+                                            <th>Prescription :</th>
                                             <td>
                                                 <textarea name="prescription" placeholder="prescription" rows="12" col="14" class="form-control w-450" required="true"></textarea>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th>Consultancy Fee</th>
+                                            <th>Consultancy Fee :</th>
                                             <td>
-                                                <textarea name="consultancy fee" placeholder="KSHs" class="form-control wd-450" required></textarea>
+                                                <textarea name="consultancy_fee" placeholder="KSHs" class="form-control wd-450" required></textarea>
                                             </td>
                                             <input type="hidden" value="i.id" name="" class="form-control" required>
                                         </tr>
@@ -197,14 +197,12 @@
                                     <button type="submit" name="submit" class="btn btn-primary">Update</button>
 
                                 </div>
-                                        </form>
-                                 </div>
+                                </form>
+                            </div>
                             </div>
                         </div>
                     </div>
-
                     {% endfor %}
-
                 </div>
             </div>
         </div>

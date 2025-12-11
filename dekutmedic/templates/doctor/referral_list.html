@@ -60,7 +60,7 @@
                                 {% for i in referrals %}
                             <tr>
                                 <td>{{ i.pat_id.admin.first_name }} {{ i.pat_id.admin.last_name}}</td>
-                                <td>{{ i.hospital_id.hname }}</td>
+                                <td>{{ i.hospital_id.admin.first_name }}</td>
                                 <td>{{ i.date_of_referral }}</td>
                                 <td>{{ i.time_of_referral }}</td>
                                 <td>{{ i.additional_msg }}</td>
@@ -81,6 +81,11 @@
                                         <button type="submit" name="action" value="accept" class="btn btn-success btn-sm"> Accept</button>
                                         <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm"> Reject</button>
                                     </form>
+                                    {% endif %}
+                                    {% if i.status == "Accepted" and i.referral_status == "Visited" %}
+                                    <a href="{% url 'doctor_referral_record' %}" class="btn btn-block bg-primary">View</a>
+                                    {% elif i.status == "Accepted" and i.referral_status != "Visited" %}
+                                    <p>Not Updated</p>
                                     {% endif %}
                                 </td>
                             </tr>

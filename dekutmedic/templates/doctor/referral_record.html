@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="content container-fluid">
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h3>Referral</h3>
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="">Dashboard</a></li>
+                    <li class="breadcrumb-item active">records</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="card">
+                <div class="card-body">
+                    {% if messages %}
+                    {% for message in messages %}
+                    {% if message.tag == 'error' %}
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        {{message}}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                </div>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+
+                    {% if messages %}
+                    {% for message in messages %}
+                    {% if message.tag == 'success' %}
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        {{message}}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+                    
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            {% for i in referralsrecord %}
+                            <tr>
+                                <th>Firstname</th>
+                                <td>{{ i.pat_id.admin.first_name }}</td>
+                                <th>Lastname</th>
+                                <td>{{ i.pat_id.admin.last_name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Date</th>
+                                <td>{{ i.date_of_referral }}</td>
+                                <th>Time</th>
+                                <td>{{ i.time_of_referral }}</td>
+                            </tr>
+                            <tr>
+                                <th>Reason</th>
+                                <td>{{ i.additional_msg }}</td>
+                            </tr>
+                            <tr>
+                                <th>Diagnosis</th>
+                                <td>{{ i.diagnosis }}</td>
+                                <th>Prescription</th>
+                                <td>{{ i.prescription }}</td>
+                            </tr>
+                            <tr>
+                                <th>Fee charged</th>
+                                <td>{{ i.referral_fee }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

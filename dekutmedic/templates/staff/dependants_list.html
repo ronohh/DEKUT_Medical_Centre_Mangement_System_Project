@@ -26,7 +26,7 @@
                     <div class="alert alert-warning alert-dismissible fade show" role="alert">
                         {{message}}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true"></span>
+                            <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     {% endif %}
@@ -39,7 +39,7 @@
                     <div class="alert alert-warning alert-dismissible fade show" role="alert">
                         {{message}}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true"></span>
+                            <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     {% endif %}
@@ -65,7 +65,7 @@
                                     <td>{{ i.gender }}</td>
                                     <td>{{ i.date_of_birth }}</td>
                                     <td>
-                                        <a href="" class="btn btn-sm bg-danger">Remove</a>
+                                        <a href="deleteuser" class="btn btn-sm bg-danger">Remove</a>
                                     </td>
                                 </tr>
                                 {% empty %}

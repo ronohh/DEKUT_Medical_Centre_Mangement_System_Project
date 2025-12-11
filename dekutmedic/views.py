@@ -6,7 +6,7 @@ import random
 from datetime import datetime
 from django.utils import timezone
 from dekutmedic.models import CustomUser
-from .models import DoctorRegistration,StaffRegistration,PharmacistRegistration, PatientReg, Appointment,AddPatient, MedicalHistory, ReferralAppointment, Payment, Insurance,Dependant
+from .models import DoctorRegistration,StaffRegistration,PharmacistRegistration, PatientReg, Appointment,AddPatient, MedicalHistory, ReferralAppointment, Payment, Insurance,Dependant, HospitalRegistration, MedicalClaim
 from django.core.paginator import Paginator,EmptyPage
 from .forms import PatientReferralForm
 import requests
@@ -62,8 +62,10 @@ def dologin(request):
                 return redirect('patienthome')
             elif user_type == 4:
                 return redirect('staffdashboard')
-            elif user_type ==5:
+            elif user_type == 5:
                 return redirect('pharmacistdashboard')
+            elif user_type == 6:
+                return redirect('hospitalReferral')
             
             else:
                 return redirect('login')
@@ -159,14 +161,20 @@ def DeleteRegUsers(request,id):
 
         if custom_user.user_type == 2:
             DoctorRegistration.objects.filter(admin=custom_user).delete()
+            custom_user.delete()
+            messages.success(request, 'doctor deleted successfully!')
         elif custom_user.user_type == 3:
             PatientReg.objects.filter(admin=custom_user).delete()
+            custom_user.delete()
+            messages.success(request, 'student deleted successfully!')
         elif custom_user.user_type == 4:
             StaffRegistration.objects.filter(admin=custom_user).delete()
+            custom_user.delete()
+            messages.success(request, 'staff deleted successfully!')
         elif custom_user.user_type == 5:
             PharmacistRegistration.objects.filter(admin=custom_user).delete()
-        custom_user.delete()
-        messages.success(request, 'User deleted successfully!')
+            custom_user.delete()
+            messages.success(request, 'pharmacist deleted successfully!')
         
     except Exception as e:
         messages.error(request, f'error deleting record: {e}')
@@ -278,11 +286,43 @@ def claim_insurance(request, id):
 
     return redirect('approvedappointments')
 
-def dependants(request, id):
-    staff = get_object_or_404(StaffRegistration, id=id)
-    dependants = Dependant.objects.filter(staff=staff)
+def review_claims(request):
+    claims = MedicalClaim.objects.all().order_by('-submitted_at')
+    context = {
+        "claims": claims
+    }
+    return render(request, "admin/claims_list.html", context)
+
+def update_claim_status(request, id, decision):
+    claim = MedicalClaim.objects.get(id=id)
+
+    if decision == "approve":
+        claim.status = "Approved"
+        claim.paid = True
+
+        insurance = Insurance.objects.get(patient=claim.pat_id)
+        if insurance.deduct_fee(claim.claim_amount):
+            claim.save()
+            messages.success(request, "Claim approved successfully")
+
+        else:
+            messages.error(request, "Insufficient insurance balance to approve claim")
+            claim.status = "Rejected"
+            claim.save()
+            return redirect('review_claims')
+    
+    elif decision == "reject":
+        claim.status = "Rejected"
+        claim.save()
+        messages.success(request, "Claim rejected successfully")
+
+    return redirect('review_claims')
+
+def admindependants(request, id):
+    staff_reg = get_object_or_404(StaffRegistration, id=id)
+    dependants = Dependant.objects.filter(staff=staff_reg)
     context ={
-        "staff" : staff,
+        "staff" : staff_reg,
         "dependants" : dependants
     }
     return render(request,'admin/dependants.html', context)
@@ -393,7 +433,7 @@ def Requestreferral(request):
             referral.pat_id = patient
             referral.save()
             messages.success(request, "Referral request sent")
-            return redirect("staffdashboard")
+            return redirect("referral_history")
         else:
             messages.error(request, "referral request not succesfull,retry.")
     else:
@@ -403,6 +443,7 @@ def Requestreferral(request):
         "patient": patient
     }
     return render(request, 'staff/referral.html',context)
+
 def referral_history(request):
     pat_reg = request.user
     pat_admin = PatientReg.objects.get(admin= pat_reg)
@@ -411,6 +452,14 @@ def referral_history(request):
         'referrals': referrals
     }
     return render(request, 'staff/referral_history.html', context)
+def staff_referral_record(request):
+    patreg = request.user
+    patadmin = PatientReg.objects.get(admin= patreg)
+    referralsrecord = ReferralAppointment.objects.filter( pat_id = patadmin, status="Accepted", referral_status="Visited")
+    context = {
+        'staff_referralsrecord': referralsrecord
+    }
+    return render(request, "staff/referral_record.html", context)
 
 # patient
 
@@ -605,21 +654,32 @@ def pharmacistdashboard(request):
 
 def newappointments(request):
     pharmacist_admin = request.user
-    Approved_Appointments = Appointment.objects.filter(status='Approved').order_by('-updated_at')
+    Approved_Appointments = Appointment.objects.filter(status='Approved',pharmacy_status='not prescribed').order_by('-updated_at')
     context = {'Approved_Appointments': Approved_Appointments}
     return render(request, 'pharmacist/new_appointments.html', context)
 
 def newpatients(request):
     pharmacist_admin = request.user
-    new_patients = AddPatient.objects.all()
-    context = {'new_patients': new_patients}
+    new_patients = MedicalHistory.objects.filter(pharmacy_status__isnull=True)
+    context = {
+        'new_patients': new_patients
+        }
     return render(request, 'pharmacist/new_patients.html', context)
 
 def pharmacy_records(request):
     pharmacist_admin = request.user
     dispensed_appointments = Appointment.objects.filter(Q(pharmacy_status='dispensed') | Q(pharmacy_status='not prescribed'))
-    context = {'dispensed_appointments': dispensed_appointments}
+    context = {
+        'dispensed_appointments': dispensed_appointments,
+        }
     return render(request, 'pharmacist/pharmacy_records.html', context)
+
+def patient_records(request):
+    patient_records = MedicalHistory.objects.filter(Q(pharmacy_status= 'prescribed')| Q(pharmacy_status='not prescribed'))
+    context = {
+        'patient_records': patient_records
+    }
+    return render(request, 'pharmacist/patients_record.html', context)
 
 def mark_as_dispensed(request, id):
     appointment = get_object_or_404(Appointment, id=id)
@@ -631,6 +691,18 @@ def mark_as_not_prescribed(request, id):
     appointment.pharmacy_status = 'not prescribed'
     appointment.save()
     return redirect('pharmacy_records')
+
+def prescribed_patients(request,id):
+    prescribed_patients = get_object_or_404(MedicalHistory,id=id)
+    prescribed_patients.pharmacy_status = 'prescribed'
+    prescribed_patients.save()
+    return redirect('patient_records')
+def not_prescribed_patients(request,id):
+    prescribed_patients = get_object_or_404(MedicalHistory,id=id)
+    prescribed_patients.pharmacy_status = 'not prescribed'
+    prescribed_patients.save()
+    return redirect('patient_records')
+
 # doctor
 def docsignup(request):
     if request.method == "POST":
@@ -809,28 +881,38 @@ def edit_patient(request):
 
     return render(request, 'edit_patient.html')
 
-def All_appointment(request):
-    patientdetails = Appointment.objects.all().order_by('-created_at','-date_of_appointment')
+def New_Appointments(request):
+    doctor_admin = request.user
+    doctor_reg = DoctorRegistration.objects.get(admin=doctor_admin)
+    patientdetails1 = Appointment.objects.filter(status="0", doctor_id= doctor_reg).order_by('date_of_appointment', 'time_of_appointment')
 
+    context = { 
+        'patientdetails1' : patientdetails1,
+        'view_type': 'new'
+                }
+
+    return render(request, 'doctor/appointments.html', context )
+
+def Approved_Appointments(request):
+    doctor_admin = request.user
+    doctor_reg = DoctorRegistration.objects.get(admin=doctor_admin)
+    patientdetails1 = Appointment.objects.filter(status= 'Approved',doctor_id=doctor_reg).order_by('-updated_at')
     context = {
-        'patientdetails': patientdetails
-    }
-    return render(request, 'doctor/all_appointment.html',context)
-        
+        'patientdetails1':patientdetails1,
+        'view_type': 'approved'}
 
-def View_Appointment(request):
-    try:
-        doctor_admin = request.user
-        doctor_reg = DoctorRegistration.objects.get(admin= doctor_admin)
-        view_appointment = Appointment.objects.filter(doctor_id=doctor_reg)
+    return render(request, 'doctor/appointments.html', context)
 
-        context = {
-            'view_appointment': view_appointment
-            }
-    except Exception as e:
-        context = {'error_message': str(e)}
-    
-    return render(request, 'doctor/view_appointment.html', context)
+def Cancelled_Appointments(request):
+    doctor_admin = request.user
+    doctor_reg = DoctorRegistration.objects.get(admin=doctor_admin)
+    patientdetails1 = Appointment.objects.filter(status= 'Canceled',doctor_id=doctor_reg)
+    context = {
+        'patientdetails1': patientdetails1,
+         'view_type': 'canceled'
+         }
+
+    return render(request, 'doctor/appointments.html', context)
 
 def View_Appointment_Details(request, id):
     patientdetails= Appointment.objects.filter(id=id)
@@ -854,82 +936,16 @@ def Patient_Appointment_Details_Remark(request):
         patientaptdet.consultancy_fee= consultancyfee
         patientaptdet.save()
         messages.success(request,"status Update successfully")
-        return redirect('view_appointment')
+        return redirect('approvedappointments')
     
-    return render(request, 'doctor/view_appointment.html')
+    return render(request, 'doctor/appointments.html')
+def All_appointment(request):
+    patientdetails = Appointment.objects.all().order_by('-created_at','-date_of_appointment')
 
-
-def New_Appointments(request):
-    doctor_admin = request.user
-    doctor_reg = DoctorRegistration.objects.get(admin=doctor_admin)
-    patientdetails1 = Appointment.objects.filter(status="0", doctor_id= doctor_reg).order_by('date_of_appointment', 'time_of_appointment')
-
-    context = { 
-        'patientdetails1' : patientdetails1,
-        'view_type': 'new'
-                }
-
-    return render(request, 'doctor/appointments.html', context )
-
-def Approved_Appointments(request):
-    doctor_admin = request.user
-    doctor_reg = DoctorRegistration.objects.get(admin=doctor_admin)
-    patientdetails1 = Appointment.objects.filter(status= 'Approved',doctor_id=doctor_reg)
     context = {
-        'patientdetails1':patientdetails1,
-        'view_type': 'approved'}
-
-    return render(request, 'doctor/appointments.html', context)
-
-def Cancelled_Appointments(request):
-    doctor_admin = request.user
-    doctor_reg = DoctorRegistration.objects.get(admin=doctor_admin)
-    patientdetails1 = Appointment.objects.filter(status= 'Canceled',doctor_id=doctor_reg)
-    context = {
-        'patientdetails1': patientdetails1,
-         'view_type': 'canceled'
-         }
-
-    return render(request, 'doctor/appointments.html', context)
-
-def Patient_List_Approved_Appointment(request):
-    doctor_admin =request.user
-    doctor_reg = DoctorRegistration.objects.get(admin=doctor_admin)
-    patientdetails1 = Appointment.objects.filter(status='Approved',doctor_id=doctor_reg)
-    context = {
-        'patientdetails1': patientdetails1
-          }
-    return render(request, 'doctor/patient_list_approved_appointment.html', context)
-
-def DoctorAppointmentList(request,id):
-    patientdetails= Appointment.objects.filter(id=id)
-    context = {'patientdetails': patientdetails}
-    
-    return render(request, 'doctor/doctor_appointment_list_details.html',context)
-
-def Patient_Appointment_Prescription(request):
-    if request.method == 'POST':
-        patient_id = request.POST.get('pat_id')
-        prescription = request.POST['prescription']
-        recommendedtest = request.POST['recommendedtest']
-        status = request.POST['status']
-        patientaptdet = Appointment.objects.get(id=patient_id)
-        patientaptdet.prescription = prescription
-        patientaptdet.recommendedtest = recommendedtest
-        patientaptdet.status = status
-        patientaptdet.save()
-        messages.success(request, 'status update successfully')
-        return redirect('view_appointment')
-    return render(request, 'doctor/patient_list_approved_appointment.html')
-
-def Patient_Appointment_Completed(request):
-    doctor_admin=request.user
-    doctor_reg= DoctorRegistration.objects.get(admin=doctor_admin)
-    patientdetails1 = Appointment.objects.filter(status='Completed',doctor_id=doctor_reg)
-    context = {
-        'patientdetails1': patientdetails1
-        }
-    return render(request, 'doctor/patient_list_approved_appointment.html',context)
+        'patientdetails': patientdetails
+    }
+    return render(request, 'doctor/all_appointment.html',context)
 
 def doctor_referral_list(request):
     doctor_admin = request.user
@@ -956,6 +972,15 @@ def doctor_referral_list(request):
         'referrals':referrals
     }
     return render(request, "doctor/referral_list.html", context)
+
+def doctor_referral_record(request):
+    doctor_admin = request.user
+    doctor_reg= DoctorRegistration.objects.get(admin=doctor_admin)
+    referralsrecord = ReferralAppointment.objects.filter(doctor_id=doctor_reg, status="Accepted", referral_status="Visited")
+    context = {
+        'referralsrecord': referralsrecord
+    }
+    return render(request, "doctor/referral_record.html", context)
 
 def Dependants(request, id):
     staff =get_object_or_404(StaffRegistration, id=id)
@@ -1086,3 +1111,89 @@ def mpesa_callback(request):
     payment.save()
 
     return HttpResponse("Callback received")
+
+# Hospital
+def signuphospital(request):
+    if request.method == "POST":
+        profile_pic = request.FILES.get('profile_pic')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name') 
+        email = request.POST.get('email')
+        username = request.POST.get('username')
+        location = request.POST.get('location')
+        password = request.POST.get('password')
+        
+
+        user = CustomUser(
+            profile_pic = profile_pic,
+            first_name= first_name,
+            last_name = last_name,
+            email = email,
+            username = username,
+            user_type = 6,
+        )
+        user.set_password(password)
+        user.save()
+        hospital = HospitalRegistration(
+            admin = user,
+            location = location,
+        )
+        hospital.save()
+        messages.success(request, 'Hospital registered successfully')
+        return redirect('login')
+    return render(request, 'hospital/register.html ')
+
+def HospitalReferral(request):
+    hospital_admin = request.user
+    hospital_reg = HospitalRegistration.objects.get(admin=hospital_admin)
+    Hreferrals = ReferralAppointment.objects.filter(status = "Accepted", referral_status ="Not Visited", hospital_id = hospital_reg)
+    context = {
+        'Hreferrals': Hreferrals
+    }
+    
+    return render(request, 'hospital/hospitalReferral.html', context)
+def ReferralDetails(request,id):
+    vrd = ReferralAppointment.objects.filter(id=id)
+    context = {
+        'vrd': vrd
+    }
+    return render(request, 'hospital/referralDetails.html', context)
+def ReferralRemarks(request):
+    if request.method == 'POST':
+        referral_id = request.POST.get('pat_id')
+        diagnosis = request.POST.get('diagnosis')
+        prescription = request.POST.get('prescription')
+        Cost = request.POST.get('referral_fee')
+        referral_status = request.POST.get('referral_status')
+        referral = ReferralAppointment.objects.get(id=referral_id)
+        referral.diagnosis = diagnosis
+        referral.prescription = prescription
+        referral.referral_fee = Cost
+        referral.referral_status = referral_status
+        referral.save()
+        messages.success(request, "Referral remarks added successfully")
+        return redirect('hospitalReferral')
+
+        
+    return render(request, 'hospital/hospitalReferral.html')
+def TreatedReferrals(request):
+    hospital_admin = request.user
+    hospital_reg = HospitalRegistration.objects.get(admin=hospital_admin)
+    Hreferrals = ReferralAppointment.objects.filter(status="Accepted", referral_status="Visited", hospital_id = hospital_reg)
+    context = {
+        'Hreferrals': Hreferrals,
+        'view_type': 'treated'
+    }
+    return render(request, 'hospital/hospitalReferral.html', context)
+def file_claim(request, id):
+    referral = ReferralAppointment.objects.get(id=id)
+    hospital = HospitalRegistration.objects.get(admin = request.user)
+
+    claim = MedicalClaim.objects.create(
+        referral = referral,
+        hospital = hospital,
+        pat_id = referral.pat_id,
+        claim_amount = referral.referral_fee 
+    )
+    messages.success(request, "Medical claim filed successfully")
+    return redirect('treatedreferrals')

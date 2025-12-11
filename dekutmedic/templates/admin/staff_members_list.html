@@ -15,8 +15,33 @@
     </div>
     <div class="row">
         <div class="col-sm-12">
-            <div class="card card-table">
+            <div class="card">
                 <div class="card-body">
+                    {% if messages %}
+                    {% for message in messages %}
+                    {% if message.tags == 'error' %}
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true"></span>
+                        </button>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+                    
+                    {% if messages %}
+                    {% for message in messages %}
+                    {% if message.tags == 'success' %}
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true"></span>
+                        </button>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
                     <div class="table-responsive">
                         <table class="table table-hover table-center mb-0 datatable">
                             <thead>
@@ -54,9 +79,9 @@
                                             {% endif %}
 
                                             
-                                        <a href="{% url 'dependants' i.id %}" class=" btn btn-sm btn-info "> Dependants </a>
+                                        <!-- <a href="{% url 'admindependants' i.id %}" class=" btn btn-sm btn-info "> Dependants </a> -->
                                             
-                                        <a href=""  onclick="return confirm('proceed to this delete staff')" class="btn btn-sm bg-danger">Delete</a>
+                                        <a href="{% url 'deleteuser' i.admin.id %}"  onclick="return confirm('proceed to this delete staff')" class="btn btn-sm bg-danger">Delete</a>
                                         </div>
                                     </td>
                                 </tr>

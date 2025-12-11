@@ -74,6 +74,8 @@
                                     <td>
                                         {% if i.status == "pending" %}
                                         <span class="badge bg-danger"></span>
+                                        {% elif i.status == "Accepted" and i.referral_status == "Visited" %}
+                                        <a href="{% url 'staff_referral_record' %}" class="btn btn-primary btn-sm">View</a>
                                         {% else %}
                                         <span class="text-muted"> cannot cancel</span>
                                         {% endif %}

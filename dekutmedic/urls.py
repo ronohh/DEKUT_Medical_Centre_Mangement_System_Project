@@ -12,19 +12,20 @@ urlpatterns = [
     path('Admin/pharmacistlist/', views.pharmacistList, name='viewpharmacistlist'),
     path('ViewDoctorDetails/<str:id>', views.ViewDoctorDetails, name='viewdoctordetails'),
     path('Admin/ViewDoctorPatient/<str:id>', views.ViewDoctorPatient, name='viewdoctorpatient'),
-    # path('Admin/ViewDoctorPatientDetails/<str:id>', views.ViewDoctorPatientDetails, name='viewdoctorpatientdetails'),
     path('Admin/registeredusers/', views.Registeredusers, name='registeredusers'),
     path('Admin/staffmembers/', views.StaffMembersList, name='staffmemberslist'),
     path('Admin/studentslist/', views.StudentsList, name='studentslist'),
     path('Admin/DoctorAppointmentList/<str:id>',views.ViewDoctorAppointmentList, name='ViewDoctorAppointmentList'),
     path('AdminAppointmentPatientDetails/<str:id>', views.ViewAppointmentPatientsDetails, name='viewappointmentpatientsdetails'),
     path('RegisteredUserAppointment/<str:id>', views.Registered_User_Appointments, name='registeredusersappointments'),
-    path('DeleteRegusers/<str:id>', views.DeleteRegUsers, name='deleteusersdetails'),
+    path('DeleteRegusers/<str:id>', views.DeleteRegUsers, name='deleteuser'),
     path('Admin/insuranceList/', views.InsuranceList, name="insurancelist"),
     path('Admin/insurance/add', views.InsuranceAdd, name="insuranceadd"),
     path('Admin/insurance/Edit/<str:id>', views.InsuranceEdit, name='editinsurance'),
     path('Admin/insurance/delete/<str:id>', views.InsuranceDelete, name='insurancedelete'),
-    path('Admin/dependants/<int:id>/', views.dependants, name='dependants'),
+    path('Admin/dependants/<str:id>/', views.admindependants, name='admindependants'),
+    path('Admin/review_claims/', views.review_claims, name='review_claims'),
+    path('Admin/claim/<str:id>/<str:decision>/', views.update_claim_status, name='update_claim_status'),
     
 
 
@@ -53,6 +54,7 @@ urlpatterns = [
     path('adddependants/', views.AddDependants, name='adddependants'),
     path('staff/Referrals/', views.Requestreferral, name='referrals'),
     path('staff/referral_history/', views.referral_history, name='referral_history'),
+    path('staff/referralrecord/', views.staff_referral_record, name='staff_referral_record'),
 
     # pharmacist panel
     path('pharmacistsignup/', views.pharmacistsignup, name='pharmacistsignup'),
@@ -60,6 +62,9 @@ urlpatterns = [
     path('pharmacist/newappointments/', views.newappointments, name='newpharmacistappointments'),
     path('pharmacist/newpatients/', views.newpatients, name='newpharmacistpatients'),
     path('pharmacy/records/', views.pharmacy_records, name='pharmacy_records'),
+    path('patientrecords/', views.patient_records, name='patient_records'),
+    path('prescribedpatients/<str:id>', views.prescribed_patients, name='prescribed_patients'),
+    path('notprescribedpatients/<str:id>', views.not_prescribed_patients, name='not_prescribed_patients'),
     path('dispense/<str:id>/', views.mark_as_dispensed, name='mark_as_dispensed'),
     path('notprescribed/<str:id>/', views.mark_as_not_prescribed, name='mark_as_not_prescribed'),
 
@@ -72,17 +77,13 @@ urlpatterns = [
     path('doctor/EditPatient', views.edit_patient, name='editpatient'),
     path('doctor/ViewPatientDetails/<str:id>', views.ViewPatientDetails, name='viewpatientdetails'),
     path('doctor/UpdatePatientMedicalRecord', views.update_patient_medical_record, name='updatepatientmedicalrecord'),
-    path('doctor/ViewAppointment', views.View_Appointment, name='view_appointment'),
     path('doctor/ViewAppointmentDetails/<str:id>', views.View_Appointment_Details, name="viewappointmentdetails"),
     path('appointmentDetailsRemark/Update', views.Patient_Appointment_Details_Remark, name='PatientAppointmentDetailsRemark'),
     path('doctor/ApprovedAppointment', views.Approved_Appointments, name='approvedappointments'),
     path('doctor/CancelledAppointments', views.Cancelled_Appointments, name="cancelledappointments"), 
     path('doctor/NewAppointments/', views.New_Appointments, name="newappointments"),
-    path('doctorPatientListApprovedAppointment', views.Patient_List_Approved_Appointment, name='patientlistappointment'),
-    path('doctorAppointmentList/<str:id>', views.DoctorAppointmentList, name='doctorappointmentlist'),
-    path('PatientAppointmentPrescription/', views.Patient_Appointment_Prescription,name='PatientAppointmentPrescription'),
-    path('PatientAppointmentCompleted/', views.Patient_Appointment_Completed, name='PatientAppointmentCompleted'),
     path('doctor/referralList/', views.doctor_referral_list, name='doctor_referrals'),
+    path('doctor/referralRecord/', views.doctor_referral_record, name='doctor_referral_record'),
     path('Admin/Allappointment/', views.All_appointment, name="allappointment"),
     path('claim_insurance/<str:id>/', views.claim_insurance, name='claim_insurance'),
     path('dependants/<str:id>/', views.Dependants, name='dependants'),
@@ -91,5 +92,13 @@ urlpatterns = [
     path("mpesa/stkpush/", views.stk_push, name="stk_push"),
     path("mpesa/form/", views.stk_form, name="stk_form"),
     path("mpesa/callback/", views.mpesa_callback, name="mpesa_callback"),
+
+    # Hospital
+    path('signuphospital/', views.signuphospital, name='signuphospital'),
+    path('hospital/', views.HospitalReferral, name='hospitalReferral'),
+    path('hospital/treatedreferrals/', views.TreatedReferrals, name='treatedreferrals'),
+    path('hospital/referral/details/<str:id>/', views.ReferralDetails, name='referraldetails'),
+    path('hospital/referral/remarks/', views.ReferralRemarks, name='referralappointmentremarks'),
+    path('hospital/fileclaim/<str:id>/', views.file_claim, name='fileclaim'),
     
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
