@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="content container-fluid">
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h3 class="page-title"> ForwardReferral</h3>
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admindashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Referral</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="card">
+                <div class="card-body">
+                    
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label>Patient</label>
+                            <input type="text" class="form-control" value="{{ referral.pat_id.admin.first_name }} {{ referral.pat_id.admin.last_name }}" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>select Doctor</label>
+                            <select class="form-control" name="doctor">
+                                <option value="">select doctor</option>
+                                {% for doctor in doctors %}
+                                <option value="{{ doctor.id }}">{{ doctor.admin.first_name }} {{ doctor.admin.last_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Forward Referral</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>    
+{% endblock %}

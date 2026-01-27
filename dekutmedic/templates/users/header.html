@@ -23,6 +23,14 @@
                         <li class="nav-item"><a class="nav-link" href="{% url 'staffregistration' %}">Staff</a></li>
                         <li class="nav-item"><a class="nav-link" href="{% url 'patientregistration' %}"> Student </a></li>
                         <li class="nav-item"><a class="nav-link" href="{% url 'signuphospital' %}">Hospital</a></li>
+                        <li class="nav-item dropdown ">
+                            <a href="#"  class="nav-link dropdown-toggle" id="othersDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Others</a>
+                            <ul class="dropdown-menu bg-success" aria-labelledby="othersDropdown">
+                                <li><a href="{% url 'dvcsignup' %}" class="dropdown-item">DVC</a></li>
+                                <li><a href="{% url 'hrregistration' %}" class="dropdown-item">HR</a></li>
+                                <li><a href="{% url 'financesignup' %}" class="dropdown-item">Finance</a></li>
+                            </ul>
+                        </li>
                     </ul>
                 </div>
             </div>

@@ -77,13 +77,13 @@
                         <div class="form-group ">
                             <label class="col-form-label col-md-2">Date</label>
                             <div class="col-md-11">
-                                <input type="date" class="form-control" name="date_of_appointment" required="True">
+                                <select name="date_of_appointment" id="date" class="form-control"></select>
                             </div>
                         </div>
                         <div class="form-group ">
                             <label class="col-form-label col-md-2">Time</label>
                             <div class="col-md-11">
-                                <input type="time" class="form-control" required="True" name="time_of_appointment">
+                                <select name="time_of_appointment" id="time" class="form-control"></select>
                             </div>
                         </div>
                         <div class="form-group ">
@@ -151,6 +151,31 @@
                 });
         })
         .catch(error => console.error("Error fetching doctors:", error));      
-    })
+    
+    document.getElementById("doctor").addEventListener("change", function(){
+        fetch(`/get_doctor_dates/?doctor_id=${this.value}`)
+        .then(response => response.json())
+        .then(data => {
+            let dateSelect = document.getElementById("date");
+            dateSelect.innerHTML = '<option value="">Select Date</option>';
+            data.forEach(date => {
+                dateSelect.innerHTML += `<option value = "${date}">${date}</option>`;
+            });
+        });
+    });
+    
+    document.getElementById("date").addEventListener("change", function(){
+        let doctor = document.getElementById("doctor").value;
+        fetch(`/get_available_times/?doctor_id=${doctor}&date=${this.value}`)
+        .then(response => response.json())
+        .then(data => {
+            let timeSelect = document.getElementById("time");
+            timeSelect.innerHTML = '<option value="">Select Time</option>';
+            data.forEach(time => {
+                timeSelect.innerHTML += `<option value = "${time}">${time}</option>`;
+            });
+        });
+    });
+});
 </script>
 {% endblock %}

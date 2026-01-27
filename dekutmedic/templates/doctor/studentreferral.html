@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="content container-fluid">
+    <div class="page-header">
+        <div class="row">
+            <div class="col">
+                <h3 class="page-title">Referral For students</h3>
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item">Dashboard</li>
+                    <li class="breadcrumb-item active"> referral</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-11">
+            <div class="card card-wrapper">
+                <div class="card-header">
+                    <h5 class="card-title">Student Referral</h5>
+                </div>
+                <div class="card-body">
+
+                    {% if messages %}
+                    {% for message in messages %}
+                    {% if message.tags == 'error' %}
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        {{message}}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+
+                    {% if messages %}
+                    {% for message in messages %}
+                    {% if message.tags == 'success' %}
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        {{message}}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+
+                    <form action="" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label class="mt-2">Hospital name</label>
+                            <div class="col-md-11">
+                                <select class="form-control" name="hospital" id="hospital_id">
+                                    <option value="">select hospital</option>
+                                    {% for hospital in hospitals %}
+                                    <option value="{{ hospital.id }}">{{ hospital }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="mt-2">search Student </label>
+                            <div class="col-md-11">
+                            <input type="text" class="form-control" id="reg_number" name="reg_number" placeholder="enter registration number" required="true">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label >First Name</label>
+                            <div class="col-md-11">
+                            <input type="text"  class="form-control" placeholder="First Name" id="first_name"  readonly>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Last Name</label>
+                            <div class="col-md-11">
+                            <input type="text" class="form-control" placeholder="Last Name" id="last_name"  readonly>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="mt-2">Date</label>
+                            <div class="col-md-11">
+                                <input type="date" class="form-control" name="date" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="mt-2">Time</label>
+                            <div class="col-md-11 ">
+                                <input type="time" class="form-control" name="time" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group row mt-3">
+                            <div class="col-xl-11">
+                                <button type="submit" class="btn btn-primary">Request</button>
+                            </div>
+                        </div>
+                        
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.getElementById('reg_number').addEventListener('blur', function(){
+        const regNumber = this.value.trim();
+        if (regNumber == "")return;
+        fetch(`/fetch_regnumber/?reg_number=${regNumber}`)
+        .then(response => response.json() )
+                .then(data => {
+                    if (data.error){
+                        alert("Registration number not found");
+                    }
+                    document.getElementById("first_name").value = data.first_name;
+                    document.getElementById("last_name").value = data.last_name;
+                    
+        })
+        .catch(err => console.error(err));
+    })
+</script>
+
+{% endblock %}

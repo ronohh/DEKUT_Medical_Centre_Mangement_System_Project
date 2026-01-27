@@ -47,11 +47,14 @@
                             <thead>
                                 {% if referrals %}
                             <tr>
-                                <th>Patient Name</th>
-                                <th>Referral Hospital</th>
+                                <th>Name</th>
+                                <!-- <th>PF NO</th> -->
+                                <th>Dependant</th>
+                                <th>Hospital</th>
                                 <th>Date</th>
                                 <th>Time</th>
-                                <th>Reason</th>
+                                <th>medical issue</th>
+                                <th>Inpatient/Outpatient</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
@@ -60,13 +63,24 @@
                                 {% for i in referrals %}
                             <tr>
                                 <td>{{ i.pat_id.admin.first_name }} {{ i.pat_id.admin.last_name}}</td>
+                                <!-- <td>{{ i.pat_id.staff.email }}</td> -->
+                                <td>{{ i.dependant }}</td>
                                 <td>{{ i.hospital_id.admin.first_name }}</td>
                                 <td>{{ i.date_of_referral }}</td>
                                 <td>{{ i.time_of_referral }}</td>
                                 <td>{{ i.additional_msg }}</td>
                                 <td>
+                                    {% if i.patient_type == "Inpatient" %}
+                                    <span>Inpatient</span>
+                                    {% else %}
+                                    <span>Outpatient</span>
+                                    {% endif %}
+                                </td>
+                                <td>
                                     {% if i.status == "Pending" %}
                                     <span class="badge bg-warning">Pending</span>
+                                    {% elif i.status == "Forwarded" %}
+                                    <span class="badge bg-info"> Pending</span>
                                     {% elif i.status == "Accepted" %}
                                     <span class="badge bg-success"> Accepted</span>
                                     {% else %}
@@ -74,7 +88,7 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    {% if i.status == "Pending" %}
+                                    {% if i.status == "Forwarded" %}
                                     <form action="" method="post" style="display:inline">
                                         {% csrf_token %}
                                         <input type="hidden" name="referral_id" value="{{ i.id }}">

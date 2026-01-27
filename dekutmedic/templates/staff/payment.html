@@ -1,52 +1,93 @@
+{% extends 'base.html' %}
+{% block content %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pay with M-PESA</title>
-</head>
-<body>
-    <h2>M-PESA</h2>
+<div class="content container-fluid">
+    <div class="page-header">
+        <div class="row">
+            <div class="col">
+                <h3 class="page-title">Payment</h3>
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item">Dashboard</li>
+                    <li class="breadcrumb-item active"> Pay</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+<!-- <body>
+    <h2>M-PESA</h2> -->
+    <div class="row">
+        <div class="col-lg-11">
+            <div class="card card-wrapper">
+                <div class="card-header">
+                    <h5 class="card-title">M-PESA</h5>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                    {% for message in messages %}
+                    {% if message.tags == 'error' %}
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        {{message}}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+
+                    {% if messages %}
+                    {% for message in messages %}
+                    {% if message.tags == 'success' %}
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+                    <form method="POST" action="{% url 'stk_push' %}">
+                        {% csrf_token %}
+                        
+                    <input type="hidden" name="payment_type" value="{{ payment_type }}">
+                    {% if appointment %}
+                    <input type="hidden" name="appointment_id" value="{{ appointment.id }}">
+                    {% endif %}
+
+                    <!-- <input type="hidden" name="appointment_id" value="{{ appointment.id }}"> -->
+
+                    <label >Phone Number:</label><br>
+                    <input type="text" name="phone" value="{{ phone }}" class="form-control mb-2" required placeholder="2547********">
+                    <br>
+                    <label >Amount (KES):</label><br>
+                    <input type="number" name="amount" value="{{ amount }}" class="form-control mb-2" readonly>
+                    <br>
+                    <button type="submit" class="btn btn-primary w-100">PAY</button>
+                </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- </body> -->
+{% if payment_type %}
+<script>
+    setInterval(function() {
+        fetch("{% url 'payment_status' %}",{
+            method: 'GET',
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        }).then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+            }
+        });
+    }, 15000); 
     
-    <form method="POST" action="{% url 'stk_push' %}">
-        {% csrf_token %}
-
-        {% if messages %}
-        {% for message in messages %}
-        {% if message.tags == 'error' %}
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            {{message}}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-        {% endif %}
-        {% endfor %}
-        {% endif %}
-
-        {% if messages %}
-        {% for message in messages %}
-        {% if message.tags == 'success' %}
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-        {% endif %}
-        {% endfor %}
-        {% endif %}
-
-        <input type="hidden" name="appointment_id" value="{{ appointment.id }}">
-
-        <label >Phone Number:</label><br>
-        <input type="text" name="phone" value="{{ i.pat_id.admin.mobilenumber }}" class="form-control mb-2" required placeholder="2547********">
-        <br>
-        <label >Amount (KES):</label><br>
-        <input type="number" name="amount" value="{{ appointment.consultancy_fee }}" class="form-control mb-2" value="{% if appointment %}{{ appointment.consultancy_fee}} {% endif %}" required min="1">
-        <br>
-        <button type="submit" class="btn btn-primary w-100">PAY</button>
-    </form>
-</body>
+            
+</script>
+{% endif %}
 </html>
+{% endblock %}

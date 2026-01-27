@@ -1,13 +1,13 @@
+from genericpath import exists
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import logout, login, authenticate
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.utils import timezone
 from dekutmedic.models import CustomUser
-from .models import DoctorRegistration,StaffRegistration,PharmacistRegistration, PatientReg, Appointment,AddPatient, MedicalHistory, ReferralAppointment, Payment, Insurance,Dependant, HospitalRegistration, MedicalClaim
-from django.core.paginator import Paginator,EmptyPage
+from .models import DoctorRegistration, Staff,StaffRegistration,PharmacistRegistration,Students, PatientReg, Appointment,AddPatient, MedicalHistory, ReferralAppointment, Payment, Insurance,Dependant, HospitalRegistration, MedicalClaim, DoctorAvailability, medicalcllaim , HRregistration , DVCregistration, Finance,StudentReferral
 from .forms import PatientReferralForm
 import requests
 import base64
@@ -65,7 +65,13 @@ def dologin(request):
             elif user_type == 5:
                 return redirect('pharmacistdashboard')
             elif user_type == 6:
-                return redirect('hospitalReferral')
+                return redirect('dependantsReferral')
+            elif user_type == 7:
+                return redirect('hrmedicalclaim')
+            elif user_type == 8:
+                return redirect('dvcmedicalclaim')
+            elif user_type == 9:
+                return redirect('financemedicalclaim')
             
             else:
                 return redirect('login')
@@ -326,19 +332,43 @@ def admindependants(request, id):
         "dependants" : dependants
     }
     return render(request,'admin/dependants.html', context)
-
+def referral_requests(request):
+    referrals = ReferralAppointment.objects.filter(status="Pending")
+    context = {
+        "referrals": referrals
+    }
+    return render(request, "admin/referral.html", context)
+def forward_referral(request, id):
+    referral = get_object_or_404(ReferralAppointment, id=id)
+    doctors = DoctorRegistration.objects.all()
+    if request.method == "POST":
+        doctor_id = request.POST.get("doctor")
+        referral.doctor_id = get_object_or_404(DoctorRegistration, id=doctor_id)
+        referral.status = "Forwarded"
+        referral.save()
+        messages.success(request, "Referral forwarded successfully")
+        return redirect('referral_requests')
+    context = {
+        "referral": referral,
+        "doctors": doctors
+    }
+    return render(request, "admin/referral_forward.html", context)
 
 # staff
 def staffregistration(request):
     if request.method == "POST":
         pic = request.FILES.get('pic')
+        Pf_number = request.POST.get('Pf_number')
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
         email = request.POST.get('email')
-        gender = request.POST.get('gender')
+        department = request.POST.get('department')
+        # gender = request.POST.get('gender')
         mobno = request.POST.get('mobno')
         username = request.POST.get('username')
         password = request.POST.get('password')
+
+        staff_dummy = Staff.objects.get(Pf_number=Pf_number)
 
         if CustomUser.objects.filter(email=email).exists():
             messages.warning(request, 'Email already exists')
@@ -361,21 +391,38 @@ def staffregistration(request):
             user.set_password(password)
             user.save()
 
+            StaffRegistration.objects.create(admin=user,department=department)
+
             patient = PatientReg(
                 admin=user,
-                gender=gender
+                staff=staff_dummy,
+
+                # gender=gender
             )
             patient.save()
-            staff = StaffRegistration(
-                admin = user,
-            )
-            staff.save()
+            
             messages.success(request, 'Signup successfully')
             return redirect('login')
 
         
 
     return render(request, 'staff/staff-register.html')
+
+def get_staff_id(request):
+    Pf_number = request.GET.get('Pf_number')
+
+    try:
+        staff = Staff.objects.get(Pf_number=Pf_number)
+        return JsonResponse({
+            'first_name': staff.first_name,
+            'last_name': staff.last_name,
+            'email': staff.email,
+            'department' : staff.department,
+            'gender': staff.gender,
+            'mobno': staff.mobno
+        })
+    except Staff.DoesNotExist:
+        return JsonResponse({'error': 'Staff ID not found'}, status=404)
 
 def staffhome(request):
     admin = request.user
@@ -421,28 +468,59 @@ def dependantslist(request):
     return render(request, 'staff/dependants_list.html', context )
 
 def Requestreferral(request):
-    try:
-        patient = PatientReg.objects.get(admin= request.user)
-    except PatientReg.DoesNotExist:
-        messages.error(request, "Patient profile not found")
-        return redirect("staffdashboard")
+    
+    patient = PatientReg.objects.get(admin= request.user)
+    hospitals = HospitalRegistration.objects.all()
+    
     if request.method == "POST":
-        form = PatientReferralForm(request.POST)
-        if form.is_valid():
-            referral = form.save(commit=False)
-            referral.pat_id = patient
-            referral.save()
-            messages.success(request, "Referral request sent")
-            return redirect("referral_history")
-        else:
-            messages.error(request, "referral request not succesfull,retry.")
-    else:
-        form = PatientReferralForm()
+        hospitalname= request.POST.get('hospital')
+        dependants = request.POST.get('dependants')
+        date = request.POST.get('referral_date')
+        time = request.POST.get('referral_time')
+        medicalissue = request.POST.get('additional_msg')
+        patienttype = request.POST.get('patienttype')
+
+        dependant_obj = None
+        if dependants:
+            dependant_obj = Dependant.objects.get(id=dependants)
+        ReferralAppointment.objects.create(
+            pat_id = patient,
+            hospital_id = HospitalRegistration.objects.get(id=hospitalname),
+            dependant = dependant_obj,
+            date_of_referral = date,
+            time_of_referral = time,
+            additional_msg = medicalissue,
+            patient_type = patienttype
+        )
+        messages.success(request, "Referral request sent")
+        return redirect("referral_history")
+    
+    dependants = Dependant.objects.filter(staff__admin=request.user)
     context = {
-        "form": form,
+        "dependants": dependants,
+        "hospitals": hospitals,
         "patient": patient
     }
     return render(request, 'staff/referral.html',context)
+def patient_change_type(request):
+    if request.method == "POST":
+        referral_id = request.POST.get("referral_id")
+
+        referral = get_object_or_404(
+            ReferralAppointment,
+            id=referral_id,
+            pat_id__admin=request.user
+        )
+
+        if referral.patient_type == "Inpatient":
+            messages.warning(request, "Already inpatient")
+            return redirect("referral_history")
+
+        referral.patient_type = "Inpatient"
+        referral.save()
+
+        messages.success(request, "Changed to inpatient successfully")
+        return redirect("referral_history")
 
 def referral_history(request):
     pat_reg = request.user
@@ -461,11 +539,41 @@ def staff_referral_record(request):
     }
     return render(request, "staff/referral_record.html", context)
 
+def medical_claim(request):
+    pat_reg = request.user
+    pat_admin = PatientReg.objects.get(admin=pat_reg)
+    if request.method == "POST":
+        hospital = request.POST.get('hospital_name')
+        visitdate = request.POST.get('visit_date')
+        patient_type = request.POST.get('patient_type')
+        receipt_image = request.FILES.get('receipt_image')
+
+        
+        medicalcllaim.objects.create(
+            hospital = hospital,
+            visitdate = visitdate,
+            patienttype = patient_type,
+            receipt_image = receipt_image,
+            pat_id = pat_admin
+        )
+        messages.success(request, "medicalclaim sent successfully")
+        return redirect('medicalclaim')
+
+    return render(request, 'staff/medical_claim.html')
+def medicalclaim_history(request):
+    patreg = request.user
+    patadmin = PatientReg.objects.get(admin=patreg)
+    medicalclaimrecords = medicalcllaim.objects.filter(pat_id = patadmin)
+    context = {
+        'medicalclaimrecords' : medicalclaimrecords
+    }
+    return render(request, 'staff/medicalclaimhistory.html',context)
 # patient
 
 def patientregistration(request):
     if request.method == "POST":
         profile_pic = request.FILES.get('profile_pic')
+        reg_number = request.POST.get('reg_number')
         first_name =request.POST.get('first_name')
         last_name = request.POST.get('last_name')
         email = request.POST.get('email')
@@ -480,29 +588,49 @@ def patientregistration(request):
         if CustomUser.objects.filter(username=username).exists():
             messages.success(request, 'username already exists')
             return redirect('patientregistration')
+        try:
+            student = Students.objects.get(reg_number=reg_number)
+        except Students.DoesNotExist:
+            messages.error(request, 'Invalid registration number')
+            return redirect('patientregistration')
         
-        else:
-            user = CustomUser(
-                first_name=first_name,
-                last_name=last_name,
-                username=username,
-                email=email,
-                user_type=3,
-                profile_pic = profile_pic,
-                mobilenumber = mobno,
-            )
-            user.set_password(password)
-            user.save()
+        user = CustomUser(
+            first_name=first_name,
+            last_name=last_name,
+            username=username,
+            email=email,
+            user_type=3,
+            profile_pic = profile_pic,
+            mobilenumber = mobno,
+        )
+        user.set_password(password)
+        user.save()
 
-            patient = PatientReg(
-                admin=user,
-                gender = gender
-            )
-            patient.save()
-            messages.success(request, 'Signup successful')
-            return redirect('login')
+        patient = PatientReg(
+            admin=user,
+            gender = gender,
+            student=student
+        )
+        patient.save()
+        messages.success(request, 'Signup successful')
+        return redirect('login')
 
     return render(request, 'patient/register.html')
+
+def get_regno(request):
+    reg_number = request.GET.get('reg_number')
+
+    try:
+        student = Students.objects.get(reg_number=reg_number)
+        return JsonResponse({
+            'first_name': student.first_name,
+            'last_name': student.last_name,
+            'email': student.email,
+            'gender': student.gender,
+            'mobno': student.mobno
+        })
+    except Students.DoesNotExist:
+        return JsonResponse({'error': 'Registration number not found'}, status=404)
 
 def patienthome(request):
     return render(request, 'patient/patienthome.html',)
@@ -542,23 +670,31 @@ def create_appointment(request):
                 appointment_date = datetime.strptime(date_of_appointment,'%Y-%m-%d').date()
                 today_date = timezone.now().date()
 
-                if appointment_date <= today_date:
+                if appointment_date < today_date:
                     messages.error(request, "please select a date in the future for your appointment")
                     return redirect('patientappointment')
             except ValueError:
                 messages.error(request, "invalid date format")
                 return redirect('patientappointment')
             
-            Appointment.objects.create(
-                appointmentnumber= appointmentnumber,
-                pat_id = patient_instance,
+            exist = Appointment.objects.filter(
                 doctor_id = doc_instance,
                 date_of_appointment = date_of_appointment,
                 time_of_appointment = time_of_appointment,
-                additional_msg = additional_msg
-            )
-            messages.success(request, "Appointment booked successfully")
+            ).exists()
 
+            if exist:
+                messages.error(request, "The selected time slot is already booked. Please choose a different time.")
+                return redirect('patientappointment')
+            request.session["booking_data"] = {
+                "doctor_id": doctor_id,
+                "date_of_appointment": date_of_appointment,
+                "time_of_appointment": time_of_appointment,
+                "additional_msg": additional_msg,
+            }
+            messages.info(request, "please pay booking fee")
+            return redirect("stk_form")
+            
         except DoctorRegistration.DoesNotExist:
             messages.error(request, "selected doctor does not exists.")
         except PatientReg.DoesNotExist:
@@ -568,6 +704,19 @@ def create_appointment(request):
         return redirect('patientappointment')
 
     return render(request, 'patient/appointment.html')
+def payment_status(request):
+    payment = Payment.objects.filter(patient__admin=request.user,payment_type="booking").order_by('-created_at').first()
+    if not payment:
+        messages.info(request, " waiting for payment")
+        return redirect("stk_form")
+    if payment.status == "failed":
+        messages.error(request, " payment failed or cancelled.")
+        return redirect("stk_form")
+    if payment.status == "success":
+        messages.success(request, "Appointment booked successfully.")
+        return redirect('viewappointmenthistory')
+    messages.info(request, "Waiting for payment confirmation.")
+    return redirect("stk_form")
 
 def view_appointment_history(request):
     pat_reg = request.user
@@ -589,7 +738,7 @@ def cancel_appointment(request,id):
             messages.error(request, "you cannot cancel this appointment")
     except Appointment.DoesNotExist:
         messages.error(request, "Appointment not found")
-    return redirect('view_appointment_history')
+    return redirect('viewappointmenthistory')
 
 def appointment_history_details(request):
     patientdetails=Appointment.objects.filter(id=id)
@@ -927,7 +1076,7 @@ def Patient_Appointment_Details_Remark(request):
         patient_id = request.POST.get('pat_id')
         diagnosis= request.POST['diagnosis']
         prescription = request.POST.get('prescription')
-        consultancyfee= request.POST['consultancy fee']
+        consultancyfee= request.POST['consultancy_fee']
         status = request.POST['status']
         patientaptdet = Appointment.objects.get(id=patient_id)
         patientaptdet.diagnosis = diagnosis
@@ -949,7 +1098,11 @@ def All_appointment(request):
 
 def doctor_referral_list(request):
     doctor_admin = request.user
-    doctor_reg= DoctorRegistration.objects.get(admin=doctor_admin)
+    try:
+        doctor_reg= DoctorRegistration.objects.get(admin=doctor_admin)
+    except DoctorRegistration.DoesNotExist:
+        messages.error(request, "Doctor profile not found. Please complete your registration.")
+        return redirect('docsignup')
     if request.method == 'POST':
         referral_id = request.POST.get("referral_id")
         action = request.POST.get("action")
@@ -967,7 +1120,7 @@ def doctor_referral_list(request):
         referral.save()
         return redirect("doctor_referrals")
 
-    referrals = ReferralAppointment.objects.filter(doctor_id=doctor_reg)
+    referrals = ReferralAppointment.objects.filter(doctor_id=doctor_reg, status="Forwarded")
     context= {
         'referrals':referrals
     }
@@ -990,6 +1143,186 @@ def Dependants(request, id):
     }
     return render(request, 'doctor/dependants.html', context)
 
+def get_doctor_dates(request):
+    doctor_id = request.GET.get('doctor_id')
+    today = timezone.localdate()
+    dates = DoctorAvailability.objects.filter(doctor_id=doctor_id, date = today).values_list('date', flat=True).distinct()
+
+    return JsonResponse([d.strftime('%Y-%m-%d') for d in dates], safe=False)
+
+def add_availability(request):
+    doctor_admin = request.user
+    doctor = DoctorRegistration.objects.get(admin=doctor_admin)
+
+    if request.method == "POST":
+        date = request.POST.get("date")
+        start_time_str = request.POST.get("start_time")
+        end_time_str = request.POST.get("end_time")
+
+        start_time = datetime.strptime(start_time_str, "%H:%M").time()
+        end_time = datetime.strptime(end_time_str, "%H:%M").time()
+
+        if start_time >= end_time:
+            messages.error(request, "End time must be after start time.")
+            return redirect('add_availability')
+        
+        exists = DoctorAvailability.objects.filter(
+            doctor=doctor,
+            date=date,
+            start_time=start_time,
+            end_time=end_time
+        ).exists()
+        if exists:
+            messages.error(request, "This availability slot already exists.")
+            return redirect('add_availability')
+        DoctorAvailability.objects.create(
+            doctor=doctor,
+            date=date,
+            start_time=start_time,
+            end_time=end_time
+        )
+        messages.success(request, "Availability added successfully.")
+        return redirect('add_availability')
+    return render(request, 'doctor/availability.html')
+
+def get_available_times(request):
+    doctor_id = request.GET.get('doctor_id')
+    date = request.GET.get('date')
+
+    selected_date = datetime.strptime(date, '%Y-%m-%d').date()
+    today = timezone.localdate()
+    now_time = timezone.localtime().time()
+
+    availability = DoctorAvailability.objects.filter(
+        doctor_id=doctor_id,
+        date=selected_date
+    )
+
+    booked_times = Appointment.objects.filter(
+        doctor_id=doctor_id,
+        date_of_appointment=selected_date,
+    ).values_list('time_of_appointment', flat=True)
+
+    available_times =[]
+
+    for a in availability:
+        current = a.start_time
+        while current < a.end_time:
+            if selected_date == today and current <= now_time:
+                current = (datetime.combine(selected_date, current)+timedelta(minutes=30).time())
+                continue
+            if current not in booked_times:
+                available_times.append(current.strftime('%H:%M'))
+            current = (datetime.combine(selected_date, current)+ timedelta(minutes=30)).time()
+
+    return JsonResponse(available_times, safe=False)
+def search_history(request):
+    doctor_admin =request.user
+    doctor_reg = DoctorRegistration.objects.get(admin=doctor_admin)
+    if request.method == "GET":
+        query = request.GET.get('query')
+        if query:
+            patient = Appointment.objects.filter(
+                doctor_id=doctor_reg
+            ).filter(
+                Q(pat_id__staff__Pf_number__icontains=query) |
+                Q(pat_id__student__reg_number__icontains=query)
+            )
+            messages.success(request, f"search results for '{query}'")
+            return render(request, 'doctor/search.html', {'patient': patient, 'query': query})
+        else:
+            messages.info(request, "Please enter a search term.")
+            return render(request, 'doctor/search.html')
+        
+def medicalclaims(request):
+    medicalclaim = medicalcllaim.objects.filter(status="submitted")
+    context = {
+        'medicalclaim': medicalclaim
+    } 
+    return render(request,'doctor/medicalclaims.html', context)
+def doctor_approve_claim(request, id):
+    claim = get_object_or_404(medicalcllaim, id=id)
+
+    if request.method == "POST":
+        claim.status = 'doctor_approved'
+        claim.doctor_approved_at =timezone.now()
+        claim.save()
+
+        messages.success(request,"claim approved and sent to HR")
+        return redirect('medicalclaims')
+    return redirect('medicalclaims')
+
+def doctor_decline_claim(request, id):
+    claim = get_object_or_404(medicalcllaim, id=id)
+    if request.method == "POST":
+        claim.status = 'declined'
+        claim.decline_reason = request.POST.get('reason')
+        claim.save()
+
+        messages.error(request, "claim declined")
+        return redirect('medicalclaims')
+    return redirect('medicalclaims')
+
+def studentreferral(request):
+    doctor_admin = request.user
+    doctor_reg = DoctorRegistration.objects.get(admin=doctor_admin)
+    hospitals = HospitalRegistration.objects.all()
+
+    if request.method == "POST":
+        hospitalname = request.POST.get('hospital')
+        regnumber = request.POST.get('reg_number')
+        # firstname= request.POST.get('fisrt_name')
+        # lastname= request.POST.get('last_name')
+        date = request.POST.get('date')
+        time = request.POST.get('time')
+
+        try:
+            referral_date = datetime.strptime(date, '%Y-%m-%d').date()
+            today_date = timezone.now().date()
+            if referral_date < today_date:
+                messages.error(
+                    request,
+                    "Please select a date that is today or in the future."
+                )
+                return redirect('studentreferral')
+        except (ValueError, TypeError):
+            messages.error(request, "Invalid date format.")
+            return redirect('studentreferral')
+        try:
+            referral_time = datetime.strptime(time, '%H:%M').time()
+            now = timezone.now()
+
+            if referral_date == today_date:
+                selected_datetime = datetime.combine(
+                    referral_date,
+                    referral_time
+                )
+
+                if selected_datetime <= now.replace(tzinfo=None):
+                    messages.error(
+                        request,
+                        "Please select a time in the future."
+                    )
+                    return redirect('studentreferral')
+
+        except (ValueError, TypeError):
+            messages.error(request, "Invalid time format.")
+            return redirect('studentreferral')
+        hospital = HospitalRegistration.objects.get(id = hospitalname)
+        patient = PatientReg.objects.get(student__reg_number = regnumber)
+        StudentReferral.objects.create(
+            hospital_id = hospital,
+            pat_id=patient,
+            doctor_id=doctor_reg,
+            date_of_referral=date,
+            time_of_referral=time
+        )
+        messages.success(request, " Referral sent")
+        return redirect('studentreferral')
+    context = {
+        "hospitals" : hospitals
+    }
+    return render(request, 'doctor/studentreferral.html',context)
 
 # DARAJA
 def get_access_token():
@@ -1002,8 +1335,24 @@ def get_access_token():
         raise Exception("Failed to obtain access token" f"status: {response.status_code}, Response: {response.text}")
     data = response.json()
     return data.get("access_token")
+def initiate_booking(request):
+    request.session["booking_data"] = {
+        "doctor_id": request.POST["doctor_id"],
+        "date_of_appointment": request.POST["date_of_appointment"],
+        "time_of_appointment": request.POST["time_of_appointment"],
+    }
+    return redirect("stk_form")
 
 def stk_form(request):
+    booking_data = request.session.get("booking_data")
+
+    if booking_data:
+        return render(request, "staff/payment.html", {
+            "payment_type": "booking",
+            "amount": 50,
+            "phone": request.user.mobilenumber,
+        })
+
     appointment_id = request.GET.get("appointment")
     appointment = None
     if appointment_id:
@@ -1018,6 +1367,7 @@ def stk_push(request):
     if request.method == "POST":
         phone = request.POST.get("phone")
         amount = request.POST.get("amount")
+        payment_type = request.POST.get("payment_type")
         appointment_id = request.POST.get("appointment_id")
         patient_id =request.POST.get("patient_id")
 
@@ -1033,10 +1383,12 @@ def stk_push(request):
             patient = PatientReg.objects.get(admin__mobilenumber = phone)
 
         payment = Payment.objects.create(
-            appointment = appointment,
+            appointment = appointment if payment_type =="consultation" else None,
             patient = patient,
             phone_number = phone,
             amount= amount,
+            payment_type = payment_type,
+            metadata = request.session.get("booking_data"),
             status = "pending"
         )
 
@@ -1082,7 +1434,11 @@ def stk_push(request):
             messages.success (request, "payment request sent to your phone. please enter M-PESA PIN")
         else:
             messages.error (request, f"Failed : {resp_data.get('errorMessage', 'unknown error')}")
-        return redirect(request.META.get("HTTP_REFERER","stk_form"))
+
+        if payment_type == "consultation":
+            return redirect(request.META.get("HTTP_REFERER", "stk_form"))
+        else:
+            return redirect("payment_status")
         
     return render(request, "staff/payment.html")
 @csrf_exempt
@@ -1099,16 +1455,35 @@ def mpesa_callback(request):
     except Payment.DoesNotExist:
         return HttpResponse("Payment record not found")
     
-    if result_code == 0:
-        items = callback["CallbackMetadata"]["Item"]
-        for item in items:
-            if item["Name"] == "MpesaReceiptNumber":
-                payment.mpesa_code = item["Value"]
-        payment.status = "success"
-
-    else:
+    if result_code != 0:
         payment.status = "failed"
+        payment.save()
+        return HttpResponse("payment failed")
+    items = callback.get("CallbackMetadata", {}).get("Item", [])
+    for item in items:
+        if item["Name"] == "MpesaReceiptNumber":
+            payment.mpesa_code = item["Value"]
+    payment.status = "success"
     payment.save()
+
+    if payment.payment_type == "booking":
+        booking_data = payment.metadata or {}
+
+        if booking_data:
+            Appointment.objects.create(
+                appointmentnumber = random.randint(00000, 99999),
+                pat_id = payment.patient,
+                doctor_id = DoctorRegistration.objects.get(id=booking_data["doctor_id"]),
+                date_of_appointment = booking_data.get("date_of_appointment"),
+                time_of_appointment = booking_data.get("time_of_appointment"),
+                additional_msg = booking_data.get("additional_msg"),
+
+            )
+    if payment.payment_type == "consultation" and payment.appointment:
+        appointment = payment.appointment
+        appointment.is_paid = True
+        appointment.status = "Approved"
+        appointment.save()
 
     return HttpResponse("Callback received")
 
@@ -1143,15 +1518,28 @@ def signuphospital(request):
         return redirect('login')
     return render(request, 'hospital/register.html ')
 
-def HospitalReferral(request):
+def DependantsReferral(request):
     hospital_admin = request.user
     hospital_reg = HospitalRegistration.objects.get(admin=hospital_admin)
     Hreferrals = ReferralAppointment.objects.filter(status = "Accepted", referral_status ="Not Visited", hospital_id = hospital_reg)
+    studentreferrals = StudentReferral.objects.filter(student_status="sent")
     context = {
-        'Hreferrals': Hreferrals
+        'Hreferrals': Hreferrals,
+        'studentreferrals': studentreferrals
     }
     
-    return render(request, 'hospital/hospitalReferral.html', context)
+    return render(request, 'hospital/dependantsreferral.html', context)
+def Studentreferrall(request):
+    hospital_admin = request.user
+    hospital_reg = HospitalRegistration.objects.get(admin=hospital_admin)
+    Hreferrals = ReferralAppointment.objects.filter(status = "Accepted", referral_status ="Not Visited", hospital_id = hospital_reg)
+    studentreferrals = StudentReferral.objects.filter(student_status="sent")
+    context = {
+        'Hreferrals': Hreferrals,
+        'studentreferrals': studentreferrals
+    }
+    return render(request, 'hospital/StudentReferral.html',context)
+    
 def ReferralDetails(request,id):
     vrd = ReferralAppointment.objects.filter(id=id)
     context = {
@@ -1172,10 +1560,10 @@ def ReferralRemarks(request):
         referral.referral_status = referral_status
         referral.save()
         messages.success(request, "Referral remarks added successfully")
-        return redirect('hospitalReferral')
+        return redirect('dependantsReferral')
 
         
-    return render(request, 'hospital/hospitalReferral.html')
+    return render(request, 'hospital/dependantsreferral.html')
 def TreatedReferrals(request):
     hospital_admin = request.user
     hospital_reg = HospitalRegistration.objects.get(admin=hospital_admin)
@@ -1184,7 +1572,7 @@ def TreatedReferrals(request):
         'Hreferrals': Hreferrals,
         'view_type': 'treated'
     }
-    return render(request, 'hospital/hospitalReferral.html', context)
+    return render(request, 'hospital/dependantsreferral.html', context)
 def file_claim(request, id):
     referral = ReferralAppointment.objects.get(id=id)
     hospital = HospitalRegistration.objects.get(admin = request.user)
@@ -1197,3 +1585,197 @@ def file_claim(request, id):
     )
     messages.success(request, "Medical claim filed successfully")
     return redirect('treatedreferrals')
+
+# HR
+def HRsignup(request):
+    if request.method == "POST":
+        profilepic = request.FILES.get('profile_pic')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+        username = request.POST.get('username')
+        mobno = request.POST.get('mobno')
+        password = request.POST.get('password')
+
+        if CustomUser.objects.filter(email=email).exists():
+            messages.warning(request, 'Email already exists')
+            return redirect('hrregistration')
+        if CustomUser.objects.filter(username=username).exists():
+            messages.warning(request, 'username already exists')
+            return redirect('hrregistration')
+        else:
+            user = CustomUser(
+                first_name=first_name,
+                last_name=last_name,
+                username=username,
+                email=email,
+                user_type=7,
+                profile_pic = profilepic,
+                mobilenumber = mobno,
+            )
+            user.set_password(password)
+            user.save()
+            HR = HRregistration(
+                admin = user,
+            )
+            HR.save()
+            messages.success(request, 'HR registered successfully')
+            return redirect('login')
+        
+    return render(request, 'others/HR_registration.html')
+
+def HRmedicalclaim(request):
+    medicalclaim = medicalcllaim.objects.filter(status='doctor_approved') 
+    context = {
+        'dmedicalclaim': medicalclaim
+    }
+    return render(request,'others/Hrmedicalclaim.html',context)
+def HR_approveclaim(request, id):
+    claim = get_object_or_404(medicalcllaim, id=id)
+    if request.method == "POST":
+        claim.status = 'hr_approved'
+        claim.hr_approved_at= timezone.now()
+        claim.save()
+
+        messages.success(request, "claim approved and sent to DVC")
+        return redirect('hrmedicalclaim')
+    return redirect('hrmedicalclaim')
+def HR_decline_claim(request, id):
+    claim = get_object_or_404(medicalcllaim, id)
+    if request.method == "POST":
+        claim.status = 'declined'
+        claim.decline_reason = request.POST.get('reason')
+        claim.save()
+
+        messages.error(request, "claim declined")
+        return redirect('hrmedicalclaim')
+    return redirect('hrmedicalclaim')
+
+# DVC
+def DVCsignup(request):
+    if request.method == "POST":
+        pic = request.FILES.get('pic')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+        username = request.POST.get('username')
+        mobno = request.POST.get('mobno')
+        password = request.POST.get('password')
+
+        if CustomUser.objects.filter(email=email).exists():
+            messages.warning(request, 'Email already exists')
+            return redirect('dvcsignup')
+        if CustomUser.objects.filter(username=username).exists():
+            messages.warning(request, 'username already exists')
+            return redirect('dvcsignup')
+        else:
+            user = CustomUser(
+                first_name=first_name,
+                last_name=last_name,
+                username=username,
+                email=email,
+                user_type=8,
+                profile_pic = pic,
+                mobilenumber = mobno,
+            )
+            user.set_password(password)
+            user.save()
+            DVC = DVCregistration(
+                admin = user,
+            )
+            DVC.save()
+            messages.success(request, 'DVC registered successfully')
+            return redirect('login')
+        
+    return render(request, 'others/DVCregistration.html')
+def DVCmedicalclaim(request):
+    medicalclaim = medicalcllaim.objects.filter(status='hr_approved')
+    context = {
+        'DVCmedicalclaim' : medicalclaim
+    }
+    return render(request, 'others/DVCmedicalclaim.html', context)
+def DVC_approveclaim(request, id):
+    claim = get_object_or_404(medicalcllaim, id=id)
+    if request.method == "POST":
+        claim.status = 'dvc_approved'
+        claim.dvc_approved_at = timezone.now()
+        claim.save()
+
+        messages.success(request, 'claim approved sent to finance')
+        return redirect('dvcmedicalclaim')
+    return redirect('dvcmedicalclaim')
+
+def DVC_decline_claim(request, id):
+    claim = get_object_or_404(medicalcllaim, id)
+    if request.method == "POST":
+        claim.status = 'declined'
+        claim.decline_reason = request.POST.get('reason')
+        claim.save()
+
+        messages.error(request, "claim declined")
+        return redirect('dvcmedicalclaim')
+    return redirect('dvcmedicalclaim') 
+
+# Finance
+def Financesignup(request):
+    if request.method == "POST":
+        pic = request.FILES.get('pic')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+        username = request.POST.get('username')
+        mobno = request.POST.get('mobno')
+        password = request.POST.get('password')
+
+        if CustomUser.objects.filter(email=email).exists():
+            messages.warning(request, 'Email already exists')
+            return redirect('financesignup')
+        if CustomUser.objects.filter(username=username).exists():
+            messages.warning(request, 'username already exists')
+            return redirect('financesignup')
+        else:
+            user = CustomUser(
+                first_name=first_name,
+                last_name=last_name,
+                username=username,
+                email=email,
+                user_type=9,
+                profile_pic = pic,
+                mobilenumber = mobno,
+            )
+            user.set_password(password)
+            user.save()
+            finance = Finance(
+                admin = user,
+            )
+            finance.save()
+            messages.success(request, 'registered successfully login')
+            return redirect('login')
+        
+    return render(request, 'others/financeregistration.html')
+def financemedicalclaim(request):
+    medicalclaim = medicalcllaim.objects.filter(status = 'dvc_approved')
+    context = {
+        'financemedicalclaim' : medicalclaim
+    }
+    return render(request, 'others/financemedicalclaims.html', context)
+def finance_approveclaim(request, id):
+    claim = get_object_or_404(medicalcllaim, id=id)
+    if request.method == "POST":
+        claim.status = 'finance_approved'
+        claim.dvc_approved_at = timezone.now()
+        claim.save()
+
+        messages.success(request, 'claim approved processing payment')
+        return redirect('financemedicalclaim')
+    return redirect('financemedicalclaim')
+def finance_decline_claim(request, id):
+    claim = get_object_or_404(medicalcllaim, id)
+    if request.method == "POST":
+        claim.status = 'declined'
+        claim.decline_reason = request.POST.get('reason')
+        claim.save()
+
+        messages.error(request, "claim declined")
+        return redirect('financemedicalclaim')
+    return redirect('financemedicalclaim')

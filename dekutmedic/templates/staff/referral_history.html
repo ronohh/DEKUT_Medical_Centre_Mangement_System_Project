@@ -52,6 +52,7 @@
                                     <th>Date</th>
                                     <th>Time</th>
                                     <th>Status</th>
+                                    <th>Inpatient/Outpatient</th>
                                     <th class="right">Action</th>
                                 </tr>
                             </thead>
@@ -64,22 +65,37 @@
                                     <td>
                                         {% if i.status == "Pending" %}
                                         <span class="badge bg-warning">Pending</span>
+                                        {% elif i.status == "Forwarded" %}
+                                        <span class="badge bg-primary">Pending</span>
                                         {% elif i.status == "Accepted" %}
                                         <span class="badge bg-success"> Accepted</span>
                                         {% else %}
                                         <span class="badge bg-danger">Rejected</span>
                                         {% endif %}
                                     </td>
-                                    
                                     <td>
-                                        {% if i.status == "pending" %}
-                                        <span class="badge bg-danger"></span>
+                                        {% if i.patient_type == "Outpatient" %}
+                                            <form method="post" action="{% url 'patient_change_type' %}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="referral_id" value="{{ i.id }}">
+                                                <button type="submit" class="btn btn-sm btn-warning">
+                                                    Change to Inpatient
+                                                </button>
+                                            </form>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inpatient</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if i.status != "Rejected" and i.referral_status != "Visited" %}
+                                        <button class="btn btn-danger btn-block">Cancel</button>
                                         {% elif i.status == "Accepted" and i.referral_status == "Visited" %}
-                                        <a href="{% url 'staff_referral_record' %}" class="btn btn-primary btn-sm">View</a>
+                                        <a href="{% url 'staff_referral_record' %}" class="btn bg-primary btn-block">View</a>
                                         {% else %}
                                         <span class="text-muted"> cannot cancel</span>
                                         {% endif %}
                                     </td>
+
                                 </tr>
                                 {% empty %}
                                 <tr>

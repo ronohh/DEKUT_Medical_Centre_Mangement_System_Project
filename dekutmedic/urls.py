@@ -26,6 +26,8 @@ urlpatterns = [
     path('Admin/dependants/<str:id>/', views.admindependants, name='admindependants'),
     path('Admin/review_claims/', views.review_claims, name='review_claims'),
     path('Admin/claim/<str:id>/<str:decision>/', views.update_claim_status, name='update_claim_status'),
+    path('Admin/referral_requests/', views.referral_requests, name='referral_requests'),
+    path('Admin/referral/forward/<str:id>/', views.forward_referral, name='forward_referral'),
     
 
 
@@ -42,10 +44,13 @@ urlpatterns = [
     path('patienthome/', views.patienthome, name='patienthome'),
     path( 'patientappointment/', views.create_appointment, name='patientappointment'),
     path('get_doctor/', views.get_doctor, name='get_doctor'),
+    path('payment_status/', views.payment_status, name='payment_status'),
     path('viewAppointmentHistory/', views.view_appointment_history, name='viewappointmenthistory'),
     path('cancelappointment/<str:id>', views.cancel_appointment, name='cancelappointment'),
     path('AppointmentHistoryDetails/', views.appointment_history_details, name='viewappointmenthistorydetails'),
     path('records/<str:id>/', views.records, name='records'),
+    path('fetch_regnumber/', views.get_regno, name='fetch_regnumber'),
+    path("patient/change-type/", views.patient_change_type, name="patient_change_type"),
 
     # staff panel
     path('staffregistration/', views.staffregistration, name='staffregistration'),
@@ -55,6 +60,9 @@ urlpatterns = [
     path('staff/Referrals/', views.Requestreferral, name='referrals'),
     path('staff/referral_history/', views.referral_history, name='referral_history'),
     path('staff/referralrecord/', views.staff_referral_record, name='staff_referral_record'),
+    path('staff/medicalclaim/', views.medical_claim , name='medicalclaim'),
+    path('staff/medicalclaimhistory', views.medicalclaim_history, name='medicalclaimhistory'),
+    path('fetch-staff/', views.get_staff_id, name='fetch_staff'),
 
     # pharmacist panel
     path('pharmacistsignup/', views.pharmacistsignup, name='pharmacistsignup'),
@@ -87,6 +95,14 @@ urlpatterns = [
     path('Admin/Allappointment/', views.All_appointment, name="allappointment"),
     path('claim_insurance/<str:id>/', views.claim_insurance, name='claim_insurance'),
     path('dependants/<str:id>/', views.Dependants, name='dependants'),
+    path('get_doctor_dates/', views.get_doctor_dates),
+    path('doctor/add_availability/', views.add_availability, name='add_availability'),
+    path('get_available_times/', views.get_available_times),
+    path('doctor/searchpatientmedicalhistory/', views.search_history, name='searchpatienthistory'),
+    path('doctor/medicalclaims', views.medicalclaims, name='medicalclaims'),
+    path('doctor/medicalclaim/approve/<str:id>', views.doctor_approve_claim, name='approvedmedicalclaim'),
+    path('doctor/medicalclaim/decline/<str:id>', views.doctor_decline_claim, name='doctordeclinedclaim'),
+    path('doctor/studentreferral/', views.studentreferral, name='studentreferral'),
     
     # daraja
     path("mpesa/stkpush/", views.stk_push, name="stk_push"),
@@ -95,10 +111,25 @@ urlpatterns = [
 
     # Hospital
     path('signuphospital/', views.signuphospital, name='signuphospital'),
-    path('hospital/', views.HospitalReferral, name='hospitalReferral'),
+    path('hospital/', views.DependantsReferral, name='dependantsReferral'),
+    path('hospital/studentsreferral', views.Studentreferrall, name='studentreferrall'),
     path('hospital/treatedreferrals/', views.TreatedReferrals, name='treatedreferrals'),
     path('hospital/referral/details/<str:id>/', views.ReferralDetails, name='referraldetails'),
     path('hospital/referral/remarks/', views.ReferralRemarks, name='referralappointmentremarks'),
     path('hospital/fileclaim/<str:id>/', views.file_claim, name='fileclaim'),
+
+    # others
+    path('HR/registration', views.HRsignup, name='hrregistration'),
+    path('HR/medicalclaim', views.HRmedicalclaim, name='hrmedicalclaim'),
+    path('HR/medicalclaim/approve/<str:id>', views.HR_approveclaim, name='hrapprovedclaim'),
+    path('HR/medicalclaim/decline/<str:id>', views.HR_decline_claim, name='hrdeclineclaim'),
+    path('DVC/registration', views.DVCsignup, name='dvcsignup'),
+    path('DVC/medicalclaim/', views.DVCmedicalclaim, name='dvcmedicalclaim'),
+    path('DVC/medicalclaim/approve/<str:id>', views.DVC_approveclaim, name='DVCapprovedclaim'),
+    path('DVC/medicalclaim/decline/<str:id>', views.DVC_decline_claim, name='DVCdeclineclaim'),
+    path('Finance/registration', views.Financesignup, name='financesignup'),
+    path('Finance/medicalclaim/', views.financemedicalclaim, name='financemedicalclaim'),
+    path('finance/medicalclaim/approve/<str:id>', views.finance_approveclaim, name='financeapprovedclaim'),
+    path('finance/medicalclaim/decline/<str:id>', views.finance_decline_claim, name='financedeclineclaim'),
     
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

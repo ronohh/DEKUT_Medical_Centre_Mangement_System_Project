@@ -68,7 +68,7 @@
                                         <div class="actions">
                                             <a href="{% url 'viewdoctordetails' i.id %}" class="btn btn-sm bg-primary mr-3">Profile</a>
                                             <a href="{% url 'ViewDoctorAppointmentList' i.id %}" class="btn btn-sm bg-secondary">Appointments</a>
-                                            <a href="{% url 'viewdoctorpatient' i.id %} " class="btn btn-sm bg-warning">Patients</a>
+                                            <!-- <a href="{% url 'viewdoctorpatient' i.id %} " class="btn btn-sm bg-warning">Patients</a> -->
                                             <a href="{% url 'deleteuser' i.admin.id %}" onclick="return confirm( 'proceed to delete this staff')" class="btn btn-sm bg-danger">Delete</a>
                                         </div>
                                     </td>

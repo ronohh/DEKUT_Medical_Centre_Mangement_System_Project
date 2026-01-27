@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="content container-fluid">
+    <div class="row align-items-center">
+        <div class="col">
+            <h3>Hospital refferals</h3>
+            <ul class="breadcrumb">
+                <li class="breadcrumb-item"> Dashboard</li>
+                <li class="breadcrumb-item active"> refferals</li>
+            </ul>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {%  for i in studentreferrals %}
+                                <tr>
+                                <td>{{ i.pat_id.admin.first_name }} {{ i.pat_id.admin.last_name }}</td>
+                                <td>{{ i.date_of_referral }}</td>
+                                <td>{{ i.time_of_referral }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

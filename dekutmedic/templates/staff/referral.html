@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<div class="container container-fluid">
+<div class="content container-fluid">
     <div class="page-header">
         <div class="row">
             <div class="col">
-                <h3 class="page-title">Book Appointments</h3>
+                <h3 class="page-title">Request Referral</h3>
                 <ul class="breadcrumb">
                     <li class="breadcrumb-item">Dashboard</li>
-                    <li class="breadcrumb-item active"> Book referral</li>
+                    <li class="breadcrumb-item active"> referral</li>
                 </ul>
             </div>
         </div>
@@ -49,9 +49,57 @@
 
                     <form action="" method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
-                        {{ form.as_p }}
-
-                        <div class="form-group row">
+                        
+                        <div class="form-group">
+                            <label class="mt-2">Hospital name</label>
+                            <div class="col-md-11">
+                                <select class="form-control" name="hospital" id="hospital_id">
+                                    <option value="">select hospital</option>
+                                    {% for hospital in hospitals %}
+                                    <option value="{{ hospital.id }}">{{ hospital }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="mt-2">select dependant</label>
+                            <div class="col-md-11">
+                                <select name="dependants" id="dependant" class="form-control">
+                                    <option value="">Dependant</option>
+                                    {% for dependant in dependants %}
+                                    <option value="{{ dependant.id }}">{{ dependant }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="mt-2">Date</label>
+                            <div class="col-md-11">
+                                <input type="date" class="form-control" name="referral_date" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="mt-2">Time</label>
+                            <div class="col-md-11 ">
+                                <input type="time" class="form-control" name="referral_time" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="mt-2">Medical issue</label>
+                            <div class="col-md-11">
+                                <textarea name="additional_msg" class="form-control" rows="4" required></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label >Inpatient/Outpatient</label>
+                            <div class="col-md-11">
+                                <select name="patienttype" class="form-control">
+                                    <option value="Outpatient">Outpatient</option>
+                                    <option value="Inpatient">Inpatient</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row mt-3">
                             <div class="col-xl-11">
                                 <button type="submit" class="btn btn-primary">Request</button>
                             </div>
@@ -63,20 +111,5 @@
         </div>
     </div>
 </div>
-<script>
-    document.addEventListener("DOMContentLoaded", function (){
-        fetch("{% url 'get_doctor' %}")
-        .then(response => response.json())
-        .then(data => {
-            let doctorSelect = document.getElementById("doctor");
-            data.doctors.forEach(doc => {
-                let option = document.createElement("option");
-                option.value = doc.id;
-                option.textContent = doc.name;
-                doctorSelect.appendChild(option);
-                });
-        })
-        .catch(error => console.error("Error fetching doctors:", error));      
-    })
-</script>
+
 {% endblock %}

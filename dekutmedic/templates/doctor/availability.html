@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="content conatainer-fluid">
+    <div class="page-header">
+        <div class="row">
+            <div class="col">
+                <h3 class="page-title">
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="">Dashboard</a></li>
+                        <li class="breadcrumb-item active">Availability</li>
+                    </ul>
+                </h3>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    {% if messages %}
+                    {% for message in messages %}
+                    {% if message.tags == "error" %}
+                    <div class="alert alert-warning alert-dismissible fade show " role="alert">
+                        {{message}}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+
+                    {% if messages %}
+                    {% for message in messages %}
+                    {% if message.tags == "success" %}
+                    <div class="alert alert-warning alert-dismissible fade show " role="alert">
+                        {{message}}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" name="date" class="form-control">
+                        </div>
+
+                        <div class="form-group">
+                            <label >Start Time</label>
+                            <input type="time" name="start_time" class="form-control">
+                        </div>
+
+                        <div class="form-group">
+                            <label >End time</label>
+                            <input type="time" name="end_time" class="form-control">
+                        </div>
+
+                        <button class="btn btn-primary mt-3">Add Availability</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

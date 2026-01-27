@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class=" content container-fluid">
+    <div class="page-header">
+        <div class="row">
+            <div class="col">
+                <h3 class="page-title">File a Medical Claim</h3>
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'staffdashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">medical claim</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="card card-wrapper">
+                <div class="card-header">
+                    <h5 class="card-title">Upload details</h5>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                    {% for message in messages %}
+                    {% if message.tags == 'error' %}
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        {{message}}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+
+                    {% if messages %}
+                    {% for message in messages %}
+                    {% if message.tags == 'success' %}
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        {{message}}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+                    <form action="" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label class="col-form-label col-md-2">Hospital visited</label>
+                            <input type="text" name="hospital_name" class="form-control" placeholder="enter hospital name" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label col-md-2">Date of visit</label>
+                            <input type="date" name="visit_date" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label col-md-2">outpatient/inpatient</label>
+                            <select name="patient_type" id="" class="form-control">
+                                <option value="">select </option>
+                                <option value="outpatient">Outpatient</option>
+                                <option value="inpatient">Inpatient</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label col-md-2">Upload medical receipt</label>
+                            <input type="file" class="form-control" name="receipt_image" required>
+                        </div>
+                        <div class="form-group mt-3">
+                            <button class=" btn-primary" type="submit">submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -9,6 +9,9 @@ class CustomUser(AbstractUser):
         (4, 'staff' ),
         (5, 'pharmacist'),
         (6, 'hospital'),
+        (7, 'HR'),
+        (8, 'DVC'),
+        (9, 'finance'),
     )
     user_type = models.IntegerField(choices=USER, default=1)
 
@@ -27,19 +30,52 @@ class DoctorRegistration(models.Model):
     def __str__(self):
         return f"{self.admin.first_name} {self.admin.last_name}"
         
-        
 class PharmacistRegistration(models.Model):
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
     regdate_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+class HRregistration(models.Model):
+    admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    regdate_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+class DVCregistration(models.Model):
+    admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    regdate_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+class Finance(models.Model):
+    admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    regdate_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+class Staff(models.Model):
+    Pf_number = models.CharField(max_length=20, unique=True)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    email = models.EmailField()
+    department = models.CharField(max_length=100)
+    gender = models.CharField(max_length=10)
+    mobno = models.CharField(max_length=13)
+
+    def __str__(self):
+        return self.Pf_number
+    
+class Students(models.Model):
+    reg_number = models.CharField(max_length=20, unique=True)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    email = models.EmailField()
+    gender = models.CharField(max_length=10)
+    mobno = models.CharField(max_length=13)
 
 class StaffRegistration(models.Model):
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
+    department = models.CharField(max_length=100,null= True, blank=True)
     regdate_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
  
 class PatientReg(models.Model):
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
+    staff = models.ForeignKey(Staff, on_delete=models.CASCADE, null=True, blank=True)
+    student = models.ForeignKey(Students, on_delete=models.CASCADE, null=True, blank=True)
     gender = models.CharField(max_length=100)
     regdate_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -52,18 +88,29 @@ class HospitalRegistration(models.Model):
 
     def __str__(self):
         return f"{self.admin.first_name} {self.admin.last_name} {self.location}"
+class Dependant(models.Model):
+    staff = models.ForeignKey(StaffRegistration, on_delete=models.CASCADE)
+    first_name = models.CharField(max_length=250)
+    last_name = models.CharField(max_length=250)
+    gender = models.CharField(max_length=100)
+    date_of_birth = models.DateField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} "    
 
 class Appointment(models.Model):
     appointmentnumber = models.IntegerField(default=0)
     pat_id = models.ForeignKey(PatientReg, on_delete=models.CASCADE)
-    date_of_appointment = models.CharField(max_length= 250)
-    time_of_appointment = models.CharField(max_length= 250)
+    date_of_appointment = models.DateField()
+    time_of_appointment = models.TimeField()
     doctor_id = models.ForeignKey(DoctorRegistration, on_delete=models.CASCADE)
     additional_msg = models.TextField(blank= True)
     diagnosis = models.CharField(max_length= 250, default="")
     prescription = models.CharField(max_length=250, default="")
     status = models.CharField(default=0, max_length=200)
     pharmacy_status = models.CharField(max_length= 200, null=True, blank=True,)
+    booking_fee = models.DecimalField(max_digits=5, decimal_places=2, default=50)
     consultancy_fee = models.DecimalField(max_digits=5, decimal_places=2,default=100)
     paid_by_insurance = models.BooleanField(default=False)
 
@@ -89,23 +136,30 @@ class Appointment(models.Model):
 class ReferralAppointment(models.Model):
     referralnumber = models.IntegerField(default=0)
     pat_id = models.ForeignKey(PatientReg, on_delete=models.CASCADE)
+    dependant = models.ForeignKey(Dependant, on_delete=models.CASCADE, null=True, blank=True)
     hospital_id = models.ForeignKey(HospitalRegistration, on_delete=models.CASCADE)
     date_of_referral = models.CharField(max_length=250)
     time_of_referral = models.CharField(max_length=250)
-    doctor_id = models.ForeignKey(DoctorRegistration, on_delete=models.CASCADE)
+    doctor_id = models.ForeignKey(DoctorRegistration, on_delete=models.CASCADE,null=True, blank=True)
     additional_msg =models.TextField(blank= True)
     remark = models.CharField(max_length=250, blank=True, null=True)
-    status = models.CharField(max_length=20,choices=[("Pending","Pending"),("Accepted","Accepted"),("Rejected","Rejected")], default="Pending")
-
+    status = models.CharField(max_length=20,choices=[("Pending","Pending"),("Forwarded","Forwarded"),("Accepted","Accepted"),("Rejected","Rejected")], default="Pending")
     diagnosis = models.CharField(max_length=250, default="")
     prescription = models.CharField(max_length=250, default="")
     referral_fee = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     referral_status = models.CharField(max_length=250, default="Not Visited", choices=[("Not Visited","Not Visited"),("Visited","Visited")])
     paid_by_insurance = models.BooleanField(default=False)
+    patient_type = models.CharField(max_length=20,choices= (("Outpatient", "Outpatient"),("Inpatient", "Inpatient"),),default="Outpatient")
 
     created_at= models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now= True)
-
+class StudentReferral(models.Model):
+    pat_id = models.ForeignKey(PatientReg, on_delete=models.CASCADE)
+    hospital_id = models.ForeignKey(HospitalRegistration, on_delete=models.CASCADE)
+    doctor_id = models.ForeignKey(DoctorRegistration, on_delete=models.CASCADE)
+    date_of_referral = models.CharField(max_length=250)
+    time_of_referral = models.CharField(max_length=250)
+    student_status = models.CharField(max_length=20, default="sent", choices=[("sent","sent"),("Received","Received")])
 class MedicalClaim(models.Model):
     referral = models.OneToOneField(ReferralAppointment, on_delete=models.CASCADE)
     hospital = models.ForeignKey(HospitalRegistration, on_delete=models.CASCADE)
@@ -115,6 +169,22 @@ class MedicalClaim(models.Model):
     submitted_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=[("Pending","Pending"),("Approved","Approved"),("Rejected","Rejected")], default="Pending")
     paid = models.BooleanField(default=False)
+class medicalcllaim(models.Model):
+    hospital = models.CharField(max_length=250)
+    pat_id = models.ForeignKey(PatientReg, on_delete=models.CASCADE, null=True, blank=True)
+    doctor_id = models.ForeignKey(DoctorRegistration, on_delete=models.CASCADE, null=True,blank=True)
+    visitdate = models.DateField(max_length=20)
+    patienttype = models.CharField(max_length=20, choices=[('Outpatient','Outpatient'),('Inpatient', 'Inpatient')])
+    receipt_image = models.ImageField()
+
+    decline_reason = models.TextField(blank=True, null=True)
+    doctor_approved_at = models.DateTimeField(null=True, blank=True)
+    hr_approved_at = models.DateTimeField(null=True, blank=True)
+    dvc_approved_at = models.DateTimeField(null=True, blank=True)
+    finance_approved_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices= [('submitted', 'Submitted'), ('doctor_approved','Approved by Doctor'),('hr_approved','Approved by HR'),('dvc_approved', 'Approved by DVC'),('finance_approved','Approved by Finance'),('declined','Declined')], default="submitted")
+
 
 class AddPatient(models.Model):
     doctor_id = models.ForeignKey(DoctorRegistration, on_delete=models.CASCADE)
@@ -143,6 +213,8 @@ class Payment(models.Model):
     patient = models.ForeignKey(PatientReg, on_delete=models.CASCADE, null=True, blank=True)
     phone_number = models.CharField(max_length=13)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_type = models.CharField(max_length=20, null=True, blank=True)
+    metadata = models.JSONField(blank=True, null=True)
     mpesa_code = models.CharField(max_length= 20, blank= True, null=True)
     checkout_request_id = models.CharField(max_length=100, blank=True, null=True)
     status = models.CharField(max_length=10,choices=[("pending","Pending"),("success","Success"),("failed","Failed")], default="pending")
@@ -161,15 +233,11 @@ class Insurance(models.Model):
         return False
     def __str__(self):
         return f"{self.patient.admin.first_name} {self.patient.admin.last_name} Insurance Balance: {self.balance}"
-    
-class Dependant(models.Model):
-    staff = models.ForeignKey(StaffRegistration, on_delete=models.CASCADE)
-    first_name = models.CharField(max_length=250)
-    last_name = models.CharField(max_length=250)
-    gender = models.CharField(max_length=100)
-    date_of_birth = models.DateField()
-    created_at = models.DateTimeField(auto_now_add=True)
+class DoctorAvailability(models.Model):
+    doctor = models.ForeignKey(DoctorRegistration, on_delete=models.CASCADE)
+    date = models.DateField()
+    start_time = models.TimeField()
+    end_time = models.TimeField()
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} "
-    
+        return f"{self.doctor} | {self.date} {self.start_time}-{self.end_time}"    

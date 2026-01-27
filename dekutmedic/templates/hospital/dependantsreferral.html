@@ -16,6 +16,31 @@
         <div class="col-sm-12">
             <div class="card">
                 <div class="card-body">
+                    {% if messages %}
+                    {% for message in messages %}
+                    {% if message.tags == 'error' %}
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        {{message}}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+
+                    {% if messages %}
+                    {% for message in messages %}
+                    {% if message.tags == 'success' %}
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        {{message}}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
                     <div class="table-responsive">
                         <table class="table table-hover mb-0">
                             <thead>
@@ -23,7 +48,6 @@
                                     <th>Name</th>
                                     <th>Date</th>
                                     <th>Time</th>
-                                    <th>Reason</th>
                                     <th>Status</th>
                                     {% if view_type == 'treated' %}
                                     <th>Payment</th>
@@ -37,7 +61,6 @@
                                 <td>{{ i.pat_id.admin.first_name }} {{ i.pat_id.admin.last_name }}</td>
                                 <td>{{ i.date_of_referral }}</td>
                                 <td>{{ i.time_of_referral }}</td>
-                                <td>{{ i.additional_msg }}</td>
                                 <td>{{ i.referral_status }}</td>
                                 {% if view_type == 'treated' %}
                                 <td>

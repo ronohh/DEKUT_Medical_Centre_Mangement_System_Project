@@ -19,10 +19,11 @@
                 <li>
                     <a href="{% url 'viewpharmacistlist' %}"><i class="fa fa-microscope"></i><span>pharmacist list</span></a>
                 </li>
-                <li>
+                <!-- <li>
                     <a href="{% url 'insurancelist' %}"><i class="fas fa-clipboard-list"></i><span>Insurance List</span></a>
-                </li>
-                <li><a href="{% url 'review_claims' %}"><i class="fas fa-users"></i><span>claims</span></a></li>
+                </li> -->
+                <!-- <li><a href="{% url 'review_claims' %}"><i class="fas fa-users"></i><span>claims</span></a></li> -->
+                <li><a href="{% url 'referral_requests' %}"><i class="fas fa-hospital"></i>Referral</a></li>
             </ul>
         </div>
     </div>
@@ -51,16 +52,28 @@
                     </div>
                 </li>
                     
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="d-flex align-items-center" href="#PatientMenu" data-bs-toggle="collapse" role="button" aria-expanded="false" ><i class="fas fa-chalkboard-teacher"></i><span>Patient</span></a>
                     <ul class="collapse " id="PatientMenu">
                         <li><a href="{% url 'addpatient' %}">Add Patient</a></li>
                         <li><a href="{% url 'managepatient' %}">Manage Patient</a></li>
                     </ul>
-                </li>
+                </li> -->
 
                 <li>
-                    <a href="{% url 'doctor_referrals' %}"><i class="fas fa-ambulance"></i>Referral</a>
+                    <a href="{% url 'doctor_referrals' %}"><i class="fas fa-ambulance"></i>Referrals</a>
+                </li>
+                <li>
+                    <a href="{% url 'studentreferral' %}"><i class="fas fa-edit"></i> referer student</a>
+                </li>
+                <li>
+                    <a href="{% url 'searchpatienthistory' %}"><i class="fas fa-search"></i>Search medical history</a>
+                </li>
+                <li>
+                    <a href="{% url 'add_availability' %}"><i class="fas fa-calendar-plus"></i>Add Availability</a>
+                </li>
+                <li>
+                    <a href="{% url 'medicalclaims' %}"><i class="fas fa-file"></i>Medical claim</a>
                 </li>
             </ul>
         </div>
@@ -104,6 +117,10 @@
                 <li><a href="{% url 'viewappointmenthistory' %}"><i class="fas fa-calendar-check"></i><span>Appointment History</span></a></li>
                 <li><a href="{% url 'referrals' %}"><i class="fas fa-ambulance"></i><span>Referral</span></a></li>
                 <li><a href="{% url 'referral_history' %}"><i class="fas fa-notes-medical"></i><span>referall history</span></a></li>
+                <li>
+                    <a href="{% url 'medicalclaim' %}"><i class="fas fa-file"></i>Medical Claim</a>
+                </li>
+                <li><a href="{% url 'medicalclaimhistory' %}"><i class="fas fa-file"></i>Medical claim history</a></li>
                 
             </ul>
         </div>
@@ -117,9 +134,22 @@
                 <li class="menu-title"> <span> Main Menu</span></li>
                 <li><a href="{% url 'pharmacistdashboard' %}"><i class="fas fa-hospital"></i><span>Dashboard</span></a></li>
                 <li><a href="{% url 'newpharmacistappointments' %}"><i class="fas fa-users"></i><span>New appointment</span></a></li>
-                <li><a href="{% url 'newpharmacistpatients' %}"><i class="fas fa-users"></i><span>New patient</span></a></li>
-                <li><a href="{% url 'pharmacy_records' %}"><i class="fas fa-clipboard-list"></i><span>records</span></a></li>
-                <li><a href="{% url 'patient_records' %}"><i class="fas fa-users"></i> <span>patient record</span></a></li>
+                <!-- <li><a href="{% url 'newpharmacistpatients' %}"><i class="fas fa-users"></i><span>New patient</span></a></li> -->
+                <li><a href="{% url 'pharmacy_records' %}"><i class="fas fa-clipboard-list"></i><span>pharmacy records</span></a></li>
+                <!-- <li><a href="{% url 'patient_records' %}"><i class="fas fa-users"></i> <span>patient record</span></a></li> -->
+            </ul>
+        </div>
+    </div>
+</div>
+{% elif user.user_type == 6 %}
+<div class="sidebar">
+    <div class="sidebar-inner">
+        <div class="sidebar-menu">
+            <ul>
+                <li class="menu-title"> <span>Main Menu</span> </li>
+                <li><a href="{% url 'dependantsReferral' %}"><i class="fas fa-ambulance"></i><span>dependant Referrall </span></a></li>
+                <li><a href="{% url 'studentreferrall' %}"><i class="fas fa-ambulance"></i><span>Student Referral</span></a></li>
+                <li><a href="{% url 'treatedreferrals' %}"><i class="fas fa-ambulance"></i><span>Treated referrals</span></a></li>
             </ul>
         </div>
     </div>
@@ -130,8 +160,7 @@
         <div class="sidebar-menu">
             <ul>
                 <li class="menu-title"> <span>Main Menu</span> </li>
-                <li><a href="{% url 'hospitalReferral' %}"><i class="fas fa-ambulance"></i><span>referral</span></a></li>
-                <li><a href="{% url 'treatedreferrals' %}"><i class="fas fa-ambulance"></i><span>Treated referrals</span></a></li>
+                <li><a href=""><i class="fas fa-ambulance"></i><span>claims </span></a></li>
             </ul>
         </div>
     </div>

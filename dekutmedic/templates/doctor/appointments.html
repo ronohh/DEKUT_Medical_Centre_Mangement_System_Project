@@ -50,6 +50,7 @@
                                 {% if patientdetails1 %}
                                 <tr>
                                     <th>Appointment No.</th>
+                                    <th>Pf/Reg</th>
                                     <th>Patient Name</th>
                                     <th>Mobile No:</th>
                                     <th>Date </th>
@@ -70,6 +71,15 @@
 
                                 <tr>
                                     <td>{{i.appointmentnumber}}</td>
+                                    <td>
+                                        {% if i.pat_id.student %}
+                                        {{ i.pat_id.student.reg_number }}
+                                        {% elif i.pat_id.staff %}
+                                        {{ i.pat_id.staff.Pf_number }}
+                                        {% else %}
+                                        N/A
+                                        {% endif %}
+                                    </td>
                                     <td>{{i.pat_id.admin.first_name}} {{i.pat_id.admin.last_name}}</td>
                                     <td>{{i.pat_id.admin.mobilenumber}}</td>
                                     <td>{{i.date_of_appointment}}</td>
@@ -100,19 +110,20 @@
                                         {% elif i.pat_id.admin.user_type == 4 %}
                                             {% if i.is_paid %}
                                                 <span class="badge bg-success">Paid</span>
-                                            {% elif i.paid_by_insurance %}
-                                            <span class="badge bg-info"> Paid by insurance</span>
+                                            <!-- {% elif i.paid_by_insurance %}
+                                            <span class="badge bg-info"> Paid by insurance</span> -->
                                             {% else %}
                                                 <form method="POST" action="{% url 'stk_push' %}">
                                                     {% csrf_token %}
+                                                    <input type="hidden" name="payment_type" value="consultation">
                                                     <input type="hidden" name="appointment_id" value="{{ i.id }}">
                                                     <input type="hidden" name="patient_id" value="{{ i.pat_id.id }}">
                                                     <input type="hidden" name="phone" value="{{ i.pat_id.admin.mobilenumber }}">
                                                     <input type="hidden" name="amount" value="{{ i.consultancy_fee }}">
                                                     <button class="btn bg-danger btn-sm mb-1"> Send Prompt</button>
                                                 </form>
-                                                <a href="{% url 'claim_insurance' i.id %}" class="btn btn-sm bg-success "> use Insurance</a>
-                                                {% endif %}
+                                                    <!-- <a href="{% url 'claim_insurance' i.id %}" class="btn btn-sm bg-success "> use Insurance</a> -->
+                                            {% endif %}
                                         {% endif %}
                                     </td>
                                     {% endif %}

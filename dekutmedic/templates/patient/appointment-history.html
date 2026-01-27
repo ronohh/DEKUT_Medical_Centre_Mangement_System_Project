@@ -58,9 +58,9 @@
                                     <th>Status</th>
                                     <th class="text-right"><th>Action</th></th>
 
-                                    {% if user.user_type == 4 %}
-                                    <th>Fee</th>
-                                    {% endif %}
+                                    <!-- {% if user.user_type == 4 %}
+                                    <th>Payment</th>
+                                    {% endif %} -->
 
                                     <th>Record</th>
                                 </tr>
@@ -96,17 +96,17 @@
                                     </div>
                                 </td>
 
-                                {% if user.user_type == 4 %}
+                                <!-- {% if user.user_type == 4 %}
                                 <td>
                                     {% if appointment.paid_by_insurance %}
                                         <span class="badge bg-info">Paid</span>
                                     {% elif appointment.is_paid %}
                                         <span class="badge bg-success">paid</span>
                                     {% else %}
-                                    <a href="{% url 'stk_form' %}?appointment_id={{ appointment.id}}" class="btn btn-success btn-sm">Pay {{appointment.consultancy_fee}}</a>
+                                    <p href="" >Not yet</p>
                                     {% endif %}
                                 </td>
-                                {% endif %}
+                                {% endif %} -->
 
                                 <td>
                                     <a href="{% url 'records' appointment.id %}" class="btn btn-sm bg-primary ">view</a>
