@@ -2,23 +2,25 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dekut Medical Centre Patient registration</title>
+    <title>Student Registration</title>
 
     <link rel="stylesheet" href="{% static 'css/bootstrap-5.0.2-dist/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
+
 <body>
     <div class="main-wrapper login-body">
         <div class="login-wrapper">
             <div class="container">
                 <div class="loginbox">
                     <div class="login-left">
-                        <p >Dekut Medical Centre</p>
-                        
+                        <p>Dekut Medical Centre</p>
+
                     </div>
 
                     <div class="login-right">
@@ -49,7 +51,7 @@
                                 {% endif %}
                                 {% endfor %}
                                 {% endif %}
-                                
+
                                 {% csrf_token %}
                                 <div class="form-group">
                                     <label>profile pic</label>
@@ -57,7 +59,8 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Reg number</label>
-                                    <input type="text" class="form-control" id="reg_number" name="reg_number" placeholder="enter registration number" required="true">
+                                    <input type="text" class="form-control" id="reg_number" name="reg_number"
+                                        placeholder="enter registration number" required="true">
                                 </div>
                                 <!-- <label style="font-weight: Bold;">Full name </label> -->
                                 <!-- <div class="row">
@@ -67,22 +70,26 @@
     <div class="col-md-6">
         <input type="text" id="last_name" name="last_name" placeholder="surname" class="form-control" readonly>
     </div> -->
-<!-- </div> -->
+                                <!-- </div> -->
                                 <div class="form-group">
-                                    <label >First Name</label>
-                                    <input type="text"  class="form-control" placeholder="First Name" id="first_name" name="first_name" required="true">
+                                    <label>First Name</label>
+                                    <input type="text" class="form-control" placeholder="First Name" id="first_name"
+                                        name="first_name" required="true">
                                 </div>
                                 <div class="form-group">
                                     <label>Last Name</label>
-                                    <input type="text" class="form-control" placeholder="Last Name" id="last_name" name="last_name" required="true">
+                                    <input type="text" class="form-control" placeholder="Last Name" id="last_name"
+                                        name="last_name" required="true">
                                 </div>
                                 <div class="form-group">
                                     <label> Email</label>
-                                    <input type="email" class="form-control" placeholder="Email" id="email" name="email" required="true">
+                                    <input type="email" class="form-control" placeholder="Email" id="email" name="email"
+                                        required="true">
                                 </div>
                                 <div class="form-group">
                                     <label> Gender</label>
-                                    <input type="text" class="form-control" placeholder="Gender" id="gender" name="gender">
+                                    <input type="text" class="form-control" placeholder="Gender" id="gender"
+                                        name="gender">
                                     <!-- <select name="gender" id="gender" class="form-control" required="true">
                                         <option value=""> Choose Gender</option>
                                         <option value="Male">Male</option>
@@ -91,22 +98,26 @@
                                 </div>
                                 <div class="form-group">
                                     <label> Mobile Number</label>
-                                    <input type="text" class="form-control" pattern="254[0-9]{9}" maxlength="13" placeholder="2547*********" id="mobno" name="mobno" required="true">
+                                    <input type="text" class="form-control" pattern="254[0-9]{9}" maxlength="13"
+                                        placeholder="2547*********" id="mobno" name="mobno" required="true">
                                 </div>
                                 <div class="form-group">
                                     <label>Username</label>
-                                    <input type="text" class="form-control" placeholder="Enter Username" id="username" name="username" required="true">
+                                    <input type="text" class="form-control" placeholder="Enter Username" id="username"
+                                        name="username" required="true">
                                 </div>
                                 <div class="form-group">
                                     <label>password</label>
-                                    <input type="password" class="form-control" placeholder="Enter Password" id="password" name="password" required="true">
+                                    <input type="password" class="form-control" placeholder="Enter Password"
+                                        id="password" name="password" required="true">
                                 </div>
                                 <div class="form-group">
                                     <button class="btn btn-primary btn-block " type="submit">Register</button>
                                 </div>
                             </form>
 
-                            <div class="text-center already-have"><a href="{% url 'login' %}">Already have an account? click me</a></div>
+                            <div class="text-center already-have"><a href="{% url 'login' %}">Already have an account?
+                                    click me</a></div>
                         </div>
                     </div>
                 </div>
@@ -116,15 +127,15 @@
 
     <script src="{% static 'css/bootstrap-5.0.2-dist/js/bootstrap.bundle.min.js' %}"></script>
     <script>
-        document.getElementById('reg_number').addEventListener('blur', function(){
+        document.getElementById('reg_number').addEventListener('blur', function () {
             const regNumber = this.value.trim();
 
             if (regNumber === "") return;
 
             fetch(`/fetch_regnumber/?reg_number=${regNumber}`)
-                .then(response => response.json() )
+                .then(response => response.json())
                 .then(data => {
-                    if (data.error){
+                    if (data.error) {
                         alert("Registration number not found");
                     }
                     document.getElementById("first_name").value = data.first_name;
@@ -132,9 +143,10 @@
                     document.getElementById("email").value = data.email;
                     document.getElementById("gender").value = data.gender;
                     document.getElementById("mobno").value = data.mobno;
-        })
-        .catch(err => console.error(err));
+                })
+                .catch(err => console.error(err));
         });
     </script>
 </body>
+
 </html>

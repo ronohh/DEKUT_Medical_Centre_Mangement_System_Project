@@ -25,7 +25,7 @@
             <div class="dropdown-menu">
                 <div class="user-header">
                     <div class="avatar avatar-sm">
-                        <img src="{{ user.profile_pic.url }}" alt="image" class="avatar-img rounded-circle">
+                        <img src="" alt="image" class="avatar-img rounded-circle">
                     </div>
                     <div class="user-text">
                         <h6>{{user.first_name}} {{user.last_name}}</h6>
@@ -42,13 +42,13 @@
 
 {% elif user.user_type == 2 %}
 <div class="header">
-    <div class="header-left" style="padding: 0" >
+    <div class="header-left" style="padding: 0">
         <a href="{% url 'doctordashboard' %}">
-            <img src="{% static 'images/logo.png' %}" alt="DEKUT Medical Centre" width="400" >
+            <img src="{% static 'images/logo.png' %}" alt="DEKUT Medical Centre" width="400">
         </a>
     </div>
 
-    <a class="mobile_btn" >
+    <a class="mobile_btn">
         <i class="fas fa-bars"></i>
     </a>
     <ul class="nav user-menu">
@@ -85,11 +85,11 @@
 
 <div class="header">
     <div class="header-left">
-        <a href="{% url 'patienthome' %}" >
+        <a href="{% url 'patienthome' %}">
             <img src="{% static 'images/logo.png' %}" alt="DEKUT Medical Centre" width="400" height="">
         </a>
     </div>
-    
+
     <a class="mobile_btn">
         <i class="fas fa-bars"></i>
     </a>
@@ -116,7 +116,7 @@
             </div>
         </li>
     </ul>
-</div> 
+</div>
 
 {% elif user.user_type == 4 %}
 <div class="header">
@@ -152,7 +152,7 @@
         </li>
     </ul>
 </div>
-{% elif  user.user_type == 5 %}
+{% elif user.user_type == 5 %}
 <div class="header">
     <div class="header-left">
         <a href="{% url 'staffdashboard' %}">

@@ -2,43 +2,45 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin login </title>
+    <title>login </title>
 
     <link rel="stylesheet" href="{% static 'css/bootstrap-5.0.2-dist/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 
 </head>
+
 <body>
     <div class="main-wrapper login-body">
         <div class="login-wrapper">
             <div class="container">
                 <div class="loginbox">
                     <div class="login-left">
-                        <p > Dekut medical centre</p>
+                        <p> Dekut medical centre</p>
                     </div>
                     <div class="login-right">
                         <div class="login-right-wrap">
                             <h1 class="mt-5 mb-5"> LOGIN </h1>
                             {% if messages %}
-                                {% for message in messages %}
-                                    {% if message.tags == 'error' %}
+                            {% for message in messages %}
+                            {% if message.tags == 'error' %}
                             <div class="alert alert-warning alert-dismissible fade show" role="alert">
                                 {{ message }}
                                 <button type="button" class="close" data-dismiss="alert" aria-label="close">
                                     <span aria-hidden="true"></span>
                                 </button>
                             </div>
-                                    {% endif %}
-                                {% endfor %}
+                            {% endif %}
+                            {% endfor %}
                             {% endif %}
 
                             {% if messages %}
                             {% for message in messages %}
-                                {% if message.tags == 'success' %}
+                            {% if message.tags == 'success' %}
                             <div class="alert alert-warning alert-dismissible fade show" role="alert">
                                 {{ message }}
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close">
@@ -46,16 +48,18 @@
                                 </button>
                             </div>
                             {% endif %}
-                              {% endfor %}
+                            {% endfor %}
                             {% endif %}
                             <form action=" {% url 'dologin' %} " method="POST">
                                 {% csrf_token %}
 
                                 <div class="form-group-login">
-                                    <input type="text" class="form-control" placeholder="enter your username" name="username" required="true">
+                                    <input type="text" class="form-control" placeholder="enter your username"
+                                        name="username" required="true">
                                 </div>
                                 <div class="form-group-login">
-                                    <input type="password" class="form-control" placeholder="enter your password" name="password" required="true">
+                                    <input type="password" class="form-control" placeholder="enter your password"
+                                        name="password" required="true">
                                 </div>
                                 <div class="form-group-login">
                                     <button class="btn btn-primary btn-block" type="submit"> Login </button>
@@ -68,9 +72,10 @@
                         </div>
                     </div>
                 </div>
-            </div>        
+            </div>
         </div>
     </div>
     <script src="{% static 'assets/plugins/bootstrap/js/bootstrap.min.js'%}"></script>
 </body>
+
 </html>

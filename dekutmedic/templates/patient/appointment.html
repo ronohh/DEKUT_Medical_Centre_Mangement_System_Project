@@ -30,7 +30,7 @@
 
     <div class="row">
         <div class="col-lg-11">
-            <div class="card card-wrapper" >
+            <div class="card card-wrapper">
                 <div class="card-header">
                     <h5 class="card-title">Book Appointment</h5>
                 </div>
@@ -59,15 +59,15 @@
                         </button>
                     </div>
                     {% endif %}
-                     {% endfor %}
+                    {% endfor %}
                     {% endif %}
 
                     <form action="{% url 'patientappointment' %}" method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
-                        
+
 
                         <div class="form-group ">
-                            <label  class="col-form-label col-md-2">Doctor</label>
+                            <label class="col-form-label col-md-2">Doctor</label>
                             <div class="col-md-11">
                                 <select class="form-control" name="doctor_id" id="doctor" required="required">
                                     <option value="">select doctor</option>
@@ -93,7 +93,7 @@
                             </div>
                         </div>
                         <div class="form-group ">
-                            <div  class="col-sm-10">
+                            <div class="col-sm-10">
                                 <button type="submit" class="btn btn bg-primary mt-3"> Book now</button>
                             </div>
                         </div>
@@ -103,79 +103,46 @@
         </div>
     </div>
 </div>
-<div class="row mt-5">
-    <div class="col-lg-10">
-        <div class="card">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Doctor</th>
-                                <th>Day</th>
-                                <th>Availability</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>{{ forloop.Counter }}</td>
-                                <td>Doctor two</td>
-                                <td>Monday,Tuesday,Wednesday</td>
-                                <td>7 AM - 4 PM</td>
-                            </tr>
-                            <tr>
-                                <td>{{ forloop.Counter }}</td>
-                                <td>doctor four</td>
-                                <td>Thursday, Friday,Saturday</td>
-                                <td>7 AM - 4 PM</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+
 <script>
-    document.addEventListener("DOMContentLoaded", function (){
+    document.addEventListener("DOMContentLoaded", function () {
         fetch("{% url 'get_doctor' %}")
-        .then(response => response.json())
-        .then(data => {
-            let doctorSelect = document.getElementById("doctor");
-            data.doctors.forEach(doc => {
-                let option = document.createElement("option");
-                option.value = doc.id;
-                option.textContent = doc.name;
-                doctorSelect.appendChild(option);
+            .then(response => response.json())
+            .then(data => {
+                let doctorSelect = document.getElementById("doctor");
+                data.doctors.forEach(doc => {
+                    let option = document.createElement("option");
+                    option.value = doc.id;
+                    option.textContent = doc.name;
+                    doctorSelect.appendChild(option);
                 });
-        })
-        .catch(error => console.error("Error fetching doctors:", error));      
-    
-    document.getElementById("doctor").addEventListener("change", function(){
-        fetch(`/get_doctor_dates/?doctor_id=${this.value}`)
-        .then(response => response.json())
-        .then(data => {
-            let dateSelect = document.getElementById("date");
-            dateSelect.innerHTML = '<option value="">Select Date</option>';
-            data.forEach(date => {
-                dateSelect.innerHTML += `<option value = "${date}">${date}</option>`;
-            });
+            })
+            .catch(error => console.error("Error fetching doctors:", error));
+
+        document.getElementById("doctor").addEventListener("change", function () {
+            fetch(`/get_doctor_dates/?doctor_id=${this.value}`)
+                .then(response => response.json())
+                .then(data => {
+                    let dateSelect = document.getElementById("date");
+                    dateSelect.innerHTML = '<option value="">Select Date</option>';
+                    data.forEach(date => {
+                        dateSelect.innerHTML += `<option value = "${date}">${date}</option>`;
+                    });
+                });
+        });
+
+        document.getElementById("date").addEventListener("change", function () {
+            let doctor = document.getElementById("doctor").value;
+            fetch(`/get_available_times/?doctor_id=${doctor}&date=${this.value}`)
+                .then(response => response.json())
+                .then(data => {
+                    let timeSelect = document.getElementById("time");
+                    timeSelect.innerHTML = '<option value="">Select Time</option>';
+                    data.forEach(time => {
+                        timeSelect.innerHTML += `<option value = "${time}">${time}</option>`;
+                    });
+                });
         });
     });
-    
-    document.getElementById("date").addEventListener("change", function(){
-        let doctor = document.getElementById("doctor").value;
-        fetch(`/get_available_times/?doctor_id=${doctor}&date=${this.value}`)
-        .then(response => response.json())
-        .then(data => {
-            let timeSelect = document.getElementById("time");
-            timeSelect.innerHTML = '<option value="">Select Time</option>';
-            data.forEach(time => {
-                timeSelect.innerHTML += `<option value = "${time}">${time}</option>`;
-            });
-        });
-    });
-});
 </script>
 {% endblock %}
