@@ -87,7 +87,7 @@ WSGI_APPLICATION = 'medical_centre.wsgi.application'
 DATABASES ={
     'default': {
     'ENGINE': 'django.db.backends.mysql',
-    'NAME': 'dekut_medical_centre_db',
+    'NAME': 'medical_centre_db',
     'USER': 'root',
     'PASSWORD': '',
     'HOST':'localhost',
